@@ -3,7 +3,7 @@
     <div slot="header" class="clearfix">
       <i class="icon-size" :class="icon"></i>
     </div>
-    <div class="text">{{ optionName }}</div>
+    <el-link :href="url" :underline="false" class="text">{{ optionName }}</el-link>
   </el-card>
 </template>
 
@@ -18,7 +18,11 @@ export default {
     optionName: {
       type: String,
       default: "功能模块",
-    }
+    },
+    url: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {};

@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <entry-card option-name="用户管理" icon="el-icon-user"/>
+  <el-row type="flex" justify="center">
+    <entry-card option-name="用户管理" icon="el-icon-user" url="/usermanager"/>
     <entry-card/>
-  </div>
+  </el-row>
 </template>
 
 <script>
