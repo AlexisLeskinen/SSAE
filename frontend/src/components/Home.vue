@@ -1,17 +1,20 @@
 <template>
-  <el-switch v-model="value" active-color="#13ce66" inactive-color="#ff4949">
-  </el-switch>
+  <div>
+    <entry-card option-name="用户管理" icon="el-icon-user"/>
+    <entry-card/>
+  </div>
 </template>
 
 <script>
+import EntryCard from "./EntryCard";
+
 export default {
-  name: 'Home',
-  data () {
-    return {
-       value:true
-    }
-  }
-}
+  name: "Home",
+  components: {EntryCard},
+  data() {
+    return {};
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
