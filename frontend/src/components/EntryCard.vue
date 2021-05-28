@@ -36,7 +36,7 @@ export default {
 }
 
 .text {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .clearfix:before,

@@ -1,7 +1,9 @@
 <template>
-  <el-row type="flex" justify="center">
-    <entry-card option-name="用户管理" icon="el-icon-user" url="/usermanager"/>
-    <entry-card/>
+  <el-row type="flex" justify="space-around">
+    <entry-card v-for="item in enrtyList"
+                :icon="item.icon"
+                :option-name="item.optionName"
+                :url="item.url"/>
   </el-row>
 </template>
 
@@ -12,7 +14,24 @@ export default {
   name: "Home",
   components: {EntryCard},
   data() {
-    return {};
+    return {
+      enrtyList: [
+        {
+          icon: "el-icon-user",
+          optionName: "用户管理",
+          url: "/usermanager"
+        },
+        {
+          icon: "el-icon-box",
+          optionName: "收件模块",
+          url: ""
+        },
+        {
+          icon: "el-icon-receiving",
+          optionName: "配送模块",
+          url: ""
+        }],
+    };
   },
 };
 </script>
