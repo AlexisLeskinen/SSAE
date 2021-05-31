@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import EntryCard from "./EntryCard";
+import EntryCard from "../EntryCard";
 
 export default {
   name: "Home",

@@ -18,6 +18,8 @@ class ExpressInfo(models.Model):
     note = models.TextField()
     # 位置号 （A5-2-2210）
     locate = models.CharField(max_length=15)
+    # 签收时间
+    receive_date = models.DateField()
 
     def __str__(self):
         return self.express_id
