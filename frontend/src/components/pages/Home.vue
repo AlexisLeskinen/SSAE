@@ -19,7 +19,7 @@ export default {
         {
           icon: "el-icon-user",
           optionName: "用户管理",
-          url: "/usermanager"
+          url: "/admin"
         },
         {
           icon: "el-icon-box",
