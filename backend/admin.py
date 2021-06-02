@@ -1,26 +1,26 @@
-from backend.models import ExpressInfo, MainWareHouseAdmin, Receiver, WareHouseWorker
+from backend.models import *
 from django.contrib import admin
 
 # Register your models here.
 
 
 class ExpressList(admin.ModelAdmin):
-    list_display = ['express_id']
+    list_display = ('express_id', 'receiver')
 
 
 class MWAdminList(admin.ModelAdmin):
-    list_display = ['employee_id']
+    list_display = ('employee_id', 'name')
 
 
-class WokerList(admin.ModelAdmin):
-    list_display = ['employee_id']
+class WWokerList(admin.ModelAdmin):
+    list_display = ('employee_id', 'name')
 
 
 class ReceiverList(admin.ModelAdmin):
-    list_display = ['receive_id']
+    list_display = ('receive_id', 'name')
 
 
 admin.site.register(ExpressInfo, ExpressList)
 admin.site.register(MainWareHouseAdmin, MWAdminList)
-admin.site.register(WareHouseWorker, WokerList)
+admin.site.register(WareHouseWorker, WWokerList)
 admin.site.register(Receiver, ReceiverList)

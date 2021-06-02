@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.deletion import CASCADE
 
 # Create your models here.
 
@@ -14,14 +15,14 @@ workerLevel = [("0", "分仓管理员"), ("1", "分仓工作人员")]
 class ExpressInfo(models.Model):
     # id
     express_id = models.CharField(
-        verbose_name="快递ID", max_length=10, primary_key=True)
+        verbose_name="快递ID", max_length=7, primary_key=True)
     # 建筑号数
     building = models.CharField(
         verbose_name="楼宇号", max_length=5, choices=builddiingNum)
     # 收件人
     receiver = models.CharField(verbose_name="收件人", max_length=10)
     # 手机
-    phone = models.CharField(verbose_name="手机", max_length=12)
+    phone = models.CharField(verbose_name="手机", max_length=11)
     # 备注
     note = models.TextField(verbose_name="备注", blank=True, null=True)
     # 位置号 （A5-2-2210）
@@ -69,19 +70,24 @@ class Receiver(BaseInfo):
 # 员工共有属性
 
 
-class Employee(BaseInfo):
+class EmployeeInfo(BaseInfo):
     employee_id = models.CharField(
-        max_length=8, verbose_name="员工id", primary_key=True)
+        max_length=5, verbose_name="员工id", primary_key=True)
+
+    def __str__(self):
+        return self.employee_id + " "+self.name
 
     class Meta:
-        abstract = True
+       abstract = True
+
 
 # 总仓管理员
 
 
-class MainWareHouseAdmin(Employee):
-    def __str__(self):
-        return self.employee_id + " "+self.name
+class MainWareHouseAdmin(EmployeeInfo):
+
+    # def __str__(self):
+    #     return self.employee_id + " "+self.name
 
     class Meta:
         verbose_name = u"总仓管理员"
@@ -90,14 +96,14 @@ class MainWareHouseAdmin(Employee):
 # 分仓人员
 
 
-class WareHouseWorker(Employee):
+class WareHouseWorker(EmployeeInfo):
     level = models.CharField(
         max_length=2, verbose_name="职工类别", choices=workerLevel)
     building = models.CharField(
         verbose_name="负责的楼宇", max_length=5, choices=builddiingNum)
 
-    def __str__(self):
-        return self.employee_id + " "+self.name
+    # def __str__(self):
+    #     return self.employee_id + " "+self.name
 
     class Meta:
         verbose_name = u"分仓人员"
