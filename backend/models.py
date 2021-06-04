@@ -44,7 +44,8 @@ class ExpressInfo(models.Model):
 
 class BaseInfo(models.Model):
     name = models.CharField(max_length=10, verbose_name="姓名")
-    phone = models.CharField(max_length=12, verbose_name="手机")
+    sex = models.CharField(max_length=2, verbose_name="性别")
+    phone = models.CharField(max_length=11, verbose_name="手机")
 
     class Meta:
         abstract = True

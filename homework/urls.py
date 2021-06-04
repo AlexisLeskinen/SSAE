@@ -22,6 +22,4 @@ urlpatterns = [
     path('api/', include('backend.urls')),
     path('admin/', admin.site.urls),
     # 其他页面
-    # re_path(r'[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]',
-    #         TemplateView.as_view(template_name='index.html')),
 ]
