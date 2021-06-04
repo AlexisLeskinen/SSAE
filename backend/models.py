@@ -87,9 +87,6 @@ class EmployeeInfo(BaseInfo):
 
 class MainWareHouseAdmin(EmployeeInfo):
 
-    # def __str__(self):
-    #     return self.employee_id + " "+self.name
-
     class Meta:
         verbose_name = u"总仓管理员"
         verbose_name_plural = u"总仓管理员"
@@ -102,9 +99,6 @@ class WareHouseWorker(EmployeeInfo):
         max_length=2, verbose_name="职工类别", choices=workerLevel)
     building = models.CharField(
         verbose_name="负责的楼宇", max_length=5, choices=builddiingNum)
-
-    # def __str__(self):
-    #     return self.employee_id + " "+self.name
 
     class Meta:
         verbose_name = u"分仓人员"
