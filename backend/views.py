@@ -1,8 +1,8 @@
-import json
-from backend.models import ExpressInfo, Receiver
+from backend.models import ExpressInfo, Receiver, WareHouseWorker
 from django.http.response import HttpResponse, JsonResponse
 from django.core import serializers
 import random
+import json
 # 假数据生成包
 from faker import Faker
 # Create your views here.
@@ -46,10 +46,9 @@ def generalExpress(request):
 def generalReceiver(request):
     Einfos = modelToJson(ExpressInfo)
 
-    sexstr = "男女"
     for e in Einfos:
         name = e['receiver']
-        sex = sexstr[random.randrange(0, 2)]
+        sex = "男女"[random.randrange(0, 2)]
         phone = e['phone']
         id = str(random.randrange(1, 100000000)).zfill(8)
         selfservice = random.randrange(0, 2)
@@ -61,3 +60,23 @@ def generalReceiver(request):
         R.save()
 
     return JsonResponse(modelToJson(Receiver), safe=False, json_dumps_params={'ensure_ascii': False})
+
+
+# 随机生成分仓人员
+def generalWarehouseWorker(request):
+    fake = Faker("zh_CN")
+
+    for i in range(13):
+        name = fake.name()
+        id = str(random.randrange(1, 100000)).zfill(5)
+        phone = fake.phone_number()
+        sex = "男女"[random.randrange(0, 2)]
+        building = "C" + str(i)
+        level = 1
+
+        W = WareHouseWorker(name=name, sex=sex,
+                            phone=phone, level=level,
+                            building=building, employee_id=id)
+        W.save()
+    
+    return JsonResponse(modelToJson(WareHouseWorker), safe=False, json_dumps_params={'ensure_ascii': False})

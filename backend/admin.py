@@ -5,19 +5,19 @@ from django.contrib import admin
 
 
 class ExpressList(admin.ModelAdmin):
-    list_display = ('express_id', 'receiver')
+    list_display = ('express_id', 'receiver', 'phone')
 
 
 class MWAdminList(admin.ModelAdmin):
-    list_display = ('employee_id', 'name')
+    list_display = ('employee_id', 'name', 'sex')
 
 
 class WWokerList(admin.ModelAdmin):
-    list_display = ('employee_id', 'name')
+    list_display = ('employee_id', 'name', 'sex')
 
 
 class ReceiverList(admin.ModelAdmin):
-    list_display = ('receive_id', 'name')
+    list_display = ('receive_id', 'name', 'phone')
 
 
 admin.site.register(ExpressInfo, ExpressList)
