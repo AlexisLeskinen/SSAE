@@ -1,3 +1,4 @@
+from django.db.models import fields, query
 from backend.models import ExpressInfo, Receiver, WareHouseWorker
 from django.http.response import HttpResponse, JsonResponse
 from django.core import serializers
@@ -9,18 +10,32 @@ from faker import Faker
 
 
 def test(request):
-    data = modelToJson(ExpressInfo)
-    return HttpResponse(122)
+   
+    return HttpResponse(request)
+
+
+# 返回快递信息
+
+
+def getExpress(request):
+    queryset = None
+    if(request.GET['divide'] == '0'):
+        # 返回未分发的
+        queryset = ExpressInfo.objects.filter(building='')
+    else:
+        # 已分发的
+        queryset = ExpressInfo.objects.exclude(building='')
+    return HttpResponse(toJson(queryset))
 
 # 将Django的model对象的feild部分序列化成json
 
 
-def modelToJson(model):
-    queryset = serializers.serialize("json", model.objects.all())
-    queryset = json.loads(queryset)
+def toJson(queryset):
+    tempdata = serializers.serialize("json", queryset)
+    tempdata = json.loads(tempdata)
     data = []
-    for i in queryset:
-        data.append(i["fields"])
+    for d in tempdata:
+        data.append(d["fields"])
 # JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
     return data
 
@@ -43,7 +58,7 @@ def generalExpress(request):
 
 
 def generalReceiver(request):
-    Einfos = modelToJson(ExpressInfo)
+    Einfos = toJson(ExpressInfo)
 
     for e in Einfos:
         name = e['receiver']
@@ -58,7 +73,7 @@ def generalReceiver(request):
                      )
         R.save()
 
-    return JsonResponse(modelToJson(Receiver), safe=False, json_dumps_params={'ensure_ascii': False})
+    return JsonResponse(toJson(Receiver), safe=False, json_dumps_params={'ensure_ascii': False})
 
 
 # 随机生成分仓人员
@@ -77,5 +92,5 @@ def generalWarehouseWorker(request):
                             phone=phone, level=level,
                             building=building, employee_id=id)
         W.save()
-    
-    return JsonResponse(modelToJson(WareHouseWorker), safe=False, json_dumps_params={'ensure_ascii': False})
+
+    return JsonResponse(toJson(WareHouseWorker), safe=False, json_dumps_params={'ensure_ascii': False})

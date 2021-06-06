@@ -18,7 +18,7 @@ class ExpressInfo(models.Model):
         verbose_name="快递ID", max_length=7, primary_key=True)
     # 建筑号数
     building = models.CharField(
-        verbose_name="楼宇号", max_length=5, choices=builddiingNum)
+        verbose_name="楼宇号", max_length=5, choices=builddiingNum, null=True)
     # 收件人
     receiver = models.CharField(verbose_name="收件人", max_length=10)
     # 手机
@@ -44,7 +44,8 @@ class ExpressInfo(models.Model):
 
 class BaseInfo(models.Model):
     name = models.CharField(max_length=10, verbose_name="姓名")
-    sex = models.CharField(max_length=2, verbose_name="性别")
+    sex = models.CharField(max_length=1, verbose_name="性别",
+                           choices=[("男", "男"), ("女", "女")])
     phone = models.CharField(max_length=11, verbose_name="手机")
 
     class Meta:
@@ -79,7 +80,7 @@ class EmployeeInfo(BaseInfo):
         return self.employee_id + " "+self.name
 
     class Meta:
-       abstract = True
+        abstract = True
 
 
 # 总仓管理员

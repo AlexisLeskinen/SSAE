@@ -8,4 +8,5 @@ from django.urls import path
 # 这里添加api后面的url操作
 urlpatterns = [
     path('test', test),
+    path('get-express', getExpress),
 ]
