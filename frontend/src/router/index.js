@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '../components/pages/Home'
-import UserManager from "../components/pages/UserManager";
+import Login from "../components/pages/Login";
+import ExpressHandle from "../components/pages/ExpressHandle";
 
 Vue.use(Router)
 
@@ -14,9 +15,14 @@ export default new Router({
       component: Home
     },
     {
-      path: '/usermanager',
-      name: 'UserManager',
-      component: UserManager
+      path: '/login',
+      name: 'Login',
+      component: Login
+    },
+    {
+      path: '/express-handle',
+      name: 'express-handle',
+      component: ExpressHandle
     },
   ]
 })

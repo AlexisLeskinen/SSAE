@@ -10,7 +10,7 @@ from faker import Faker
 
 def test(request):
     data = modelToJson(ExpressInfo)
-    return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
+    return HttpResponse(122)
 
 # 将Django的model对象的feild部分序列化成json
 
@@ -26,7 +26,6 @@ def modelToJson(model):
 
 
 # 随机生成快递数据，写入数据库
-
 
 def generalExpress(request):
     fake = Faker("zh_CN")

@@ -1,10 +1,12 @@
 <template>
-  <el-row type="flex" justify="space-around">
-    <entry-card v-for="item in enrtyList"
-                :icon="item.icon"
-                :option-name="item.optionName"
-                :url="item.url"/>
-  </el-row>
+  <div class="home">
+    <el-row type="flex" justify="space-around" align="middle">
+      <entry-card v-for="item in enrtyList"
+                  :icon="item.icon"
+                  :option-name="item.optionName"
+                  :url="item.url"/>
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -24,7 +26,7 @@ export default {
         {
           icon: "el-icon-box",
           optionName: "收件模块",
-          url: ""
+          url: "/login"
         },
         {
           icon: "el-icon-receiving",
@@ -38,5 +40,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.home{
+  margin-top: 100px;
+}
 </style>
