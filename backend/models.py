@@ -15,10 +15,11 @@ workerLevel = [("0", "分仓管理员"), ("1", "分仓工作人员")]
 class ExpressInfo(models.Model):
     # id
     express_id = models.CharField(
-        verbose_name="快递ID", max_length=7, primary_key=True)
-    # 建筑号数
+        verbose_name="快递ID", max_length=7, primary_key=True, editable=False)
+    # 楼宇号
     building = models.CharField(
-        verbose_name="楼宇号", max_length=5, choices=builddiingNum, null=True)
+        verbose_name="收货地址", max_length=5, choices=builddiingNum)
+    is_divide = models.BooleanField(verbose_name="已分发到对应楼宇", default=False)
     # 收件人
     receiver = models.CharField(verbose_name="收件人", max_length=10)
     # 手机
@@ -29,7 +30,8 @@ class ExpressInfo(models.Model):
     locate = models.CharField(
         verbose_name="位置号", max_length=15, blank=True, null=True)
     # 签收时间
-    receive_date = models.DateField(verbose_name="签收时间", blank=True, null=True)
+    receive_date = models.DateTimeField(
+        verbose_name="签收时间", blank=True, null=True)
 
     # 后台管理名称
     class Meta:
@@ -56,7 +58,7 @@ class BaseInfo(models.Model):
 
 class Receiver(BaseInfo):
     receive_id = models.CharField(
-        max_length=8, verbose_name="收件人id", primary_key=True)
+        max_length=8, verbose_name="收件人id", primary_key=True, editable=False)
     self_service = models.BooleanField(verbose_name="自助取件")
     building = models.CharField(
         verbose_name="收件地址", max_length=5, choices=builddiingNum)
@@ -74,7 +76,7 @@ class Receiver(BaseInfo):
 
 class EmployeeInfo(BaseInfo):
     employee_id = models.CharField(
-        max_length=5, verbose_name="员工id", primary_key=True)
+        max_length=5, verbose_name="员工id", primary_key=True, editable=False)
 
     def __str__(self):
         return self.employee_id + " "+self.name

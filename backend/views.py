@@ -10,7 +10,7 @@ from faker import Faker
 
 
 def test(request):
-   
+
     return HttpResponse(request)
 
 
@@ -21,10 +21,10 @@ def getExpress(request):
     queryset = None
     if(request.GET['divide'] == '0'):
         # 返回未分发的
-        queryset = ExpressInfo.objects.filter(building='')
+        queryset = ExpressInfo.objects.filter(is_divide=False)
     else:
         # 已分发的
-        queryset = ExpressInfo.objects.exclude(building='')
+        queryset = ExpressInfo.objects.filter(is_divide=True)
     return HttpResponse(toJson(queryset))
 
 # 将Django的model对象的feild部分序列化成json
