@@ -19,6 +19,7 @@ class ExpressInfo(models.Model):
     # 楼宇号
     building = models.CharField(
         verbose_name="收货地址", max_length=5, choices=builddiingNum)
+    is_notified = models.BooleanField(verbose_name="是否已通知楼宇管理员", default=False)
     is_divide = models.BooleanField(verbose_name="已分发到对应楼宇", default=False)
     # 收件人
     receiver = models.CharField(verbose_name="收件人", max_length=10)
