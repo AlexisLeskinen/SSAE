@@ -17,7 +17,7 @@
       title="温馨提示"
       :visible.sync="dialogVisible"
       width="30%"
-      >
+    >
       <span>请输入账号和密码</span>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
@@ -57,10 +57,10 @@ export default {
         if (valid) {
           // 使用 vue-router 路由到指定页面，该方式称之为编程式导航
           this.$router.push({
-            path:"/express-handle",
-            query:{
-              tableName:"总仓快递管理",
-              apiParam:"get-express?is_divide=0",
+            path: "/express-handle",
+            query: {
+              type: 0,
+              // building:"C1",
             }
           });
         } else {

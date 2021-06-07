@@ -10,7 +10,7 @@
       <el-table
         v-loading="loading"
         :data="expressList"
-        height="350"
+        height="400"
         border
         style="width: 100%">
         <el-table-column
@@ -23,20 +23,36 @@
           label="姓名"
           width="120">
         </el-table-column>
+        <el-table-column v-if="type===0"
+                         prop="building"
+                         :filters="buildings"
+                         :filter-method="filterHandler"
+                         width="100"
+                         label="地址">
+        </el-table-column>
+        <el-table-column v-else
+                         prop="locate"
+                         width="100"
+                         label="放置位置">
+        </el-table-column>
         <el-table-column
-          prop="building"
-          width="60"
-          label="地址">
+          prop="phone"
+          label="电话">
         </el-table-column>
         <el-table-column
           prop="state"
-          label="快递状态">
+          label="快递状态" align="center">
         </el-table-column>
-        <el-table-column
-          prop="receive_date"
-          label="签收时间">
+        <!--        分仓功能-->
+        <el-table-column v-if="type===1"
+                         prop="receive_date"
+                         label="签收时间">
         </el-table-column>
       </el-table>
+      <el-button type="primary" class="footer-button"
+                 round @click="handOut">
+        {{ handleButton }}
+      </el-button>
     </el-main>
   </el-container>
 </template>
@@ -45,29 +61,41 @@
 
 export default {
   name: "ExpressHandle",
-  props: {
-    tableName:  "快递管理",
-  },
   data() {
     return {
-      userRole: [
-        "总仓管理员", "分仓管理员",
-      ],
+      type: 0,
+      tableName: "",
+      apiParam: "",
       expressList: [],
+      buildings: [],
+      handleButton: "",
       loading: true,
     }
   },
   created() {
-    this.tableName = this.$route.query.tableName;
-    // 组件创建完后获取数据，
-    // 此时 data 已经被 observed 了
-    this.getExpress()
+    this.initTable();
+    this.getExpress();
   },
   methods: {
+    initTable() {
+      this.type = Number(this.$route.query.type);
+      switch (this.type) {
+        case 0:
+          this.tableName = "总仓快递管理";
+          this.apiParam = "get-express?divide=0";
+          this.handleButton = "一键通知分发"
+          break;
+        case 1:
+          this.tableName = this.$route.query.bulidng + "分仓快递管理";
+          this.apiParam = "get-express?divide=1&building=" + this.$route.query.bulidng;
+          this.handleButton = "一键上架"
+      }
+    },
     getExpress() {
-      this.$axios.get(this.api + this.$route.query.apiParam)
+      this.$axios.get(this.api + this.apiParam)
         .then(response => {
-            this.expressList = response.data
+            this.expressList = response.data;
+            let s = new Set();
             this.expressList.forEach(v => {
               if (v["receive_date"])
                 v["state"] = "已签收"
@@ -76,15 +104,37 @@ export default {
               else if (v["is_divide"])
                 v["state"] = "已分发至" + v["building"]
               else
-                v["state"] = v["is_notified"] ? "已通知分发" : "未通知分发"
-            })
+                v["state"] = v["is_notified"] ? "已通知工作人员分发" : "未通知分发"
 
-            this.loading = false
+              if (this.type === 0)
+                s.add(v["building"]);
+
+            });
+            for (let sKey of s) {
+              let item = {
+                text: sKey,
+                value: sKey,
+              }
+              this.buildings.push(item);
+            }
+            this.loading = false;
           }
         )//获取失败
         .catch(error => {
           console.log(error);
         })
+    },
+    filterHandler(value, row, column) {
+      const property = column['property'];
+      return row[property] === value;
+    },
+    // 分发快递
+    handOut() {
+
+      this.$message({
+        message: "通知成功",
+        type: "success"
+      });
     },
   }
 }
@@ -101,5 +151,11 @@ export default {
 
 .header-title {
   line-height: 60px;
+}
+
+.footer-button {
+  float: right;
+  margin-top: 10px;
+  margin-right: 10px;
 }
 </style>
