@@ -38,9 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'rest_framework', 
     # 后台
     'backend',
+    'rest_framework',
+    # 跨域
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # 跨域
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'homework.urls'
@@ -131,3 +137,6 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True

@@ -51,6 +51,15 @@ export default {
   },
   methods: {
     getExpress() {
+      this.$axios.get("https://shotgun.zone/api/get-express?divide=0")
+        .then(response => {
+            console.log(response)
+          }
+        )//获取失败
+        .catch(error => {
+          console.log(error);
+          console.log('网络错误，不能访问');
+        })
 
     },
   }
