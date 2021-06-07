@@ -19,13 +19,12 @@ def test(request):
 
 def getExpress(request):
     queryset = None
-    if(request.GET['divide'] == '0'):
-        # 返回未分发的
-        queryset = ExpressInfo.objects.filter(is_divide=False)
+    if(request.GET.has_key('divide')):
+        is_divide = (request.GET['divide'] != '0')
+        queryset = ExpressInfo.objects.filter(is_divide=is_divide)
     else:
-        # 已分发的
-        queryset = ExpressInfo.objects.filter(is_divide=True)
-    return HttpResponse(toJson(queryset))
+        queryset = ExpressInfo.objects.all()
+    return toJson(queryset)
 
 # 将Django的model对象的feild部分序列化成json
 
@@ -35,9 +34,9 @@ def toJson(queryset):
     tempdata = json.loads(tempdata)
     data = []
     for d in tempdata:
+        d["fields"]["id"] = d["pk"]
         data.append(d["fields"])
-# JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-    return data
+    return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
 
 
 # 随机生成快递数据，写入数据库

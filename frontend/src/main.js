@@ -9,6 +9,7 @@ import 'element-ui/lib/theme-chalk/index.css';
 import axios from 'axios';
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 Vue.prototype.$axios = axios;
+Vue.prototype.api = "https://shotgun.zone/api/";
 
 Vue.use(Element)
 

@@ -29,7 +29,7 @@ class ExpressInfo(models.Model):
     note = models.TextField(verbose_name="备注", blank=True, null=True)
     # 位置号 （A5-2-2210）
     locate = models.CharField(
-        verbose_name="位置号", max_length=15, blank=True, null=True)
+        verbose_name="位置号", max_length=9, blank=True, null=True)
     # 签收时间
     receive_date = models.DateTimeField(
         verbose_name="签收时间", blank=True, null=True)
