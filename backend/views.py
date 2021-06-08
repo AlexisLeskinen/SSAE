@@ -1,4 +1,3 @@
-from django.db.models import fields, query
 from backend.models import ExpressInfo, Receiver, WareHouseWorker
 from django.http.response import HttpResponse, JsonResponse
 from django.core import serializers
@@ -33,7 +32,7 @@ def expressHandOUt(request):
 
 def getExpress(request):
     queryset = None
-    if(request.GET.has_key('divide')):
+    if('divide' in request.GET):
         is_divide = (request.GET['divide'] != '0')
         queryset = ExpressInfo.objects.filter(is_divide=is_divide)
     else:
