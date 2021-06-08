@@ -8,11 +8,17 @@
     </el-header>
     <el-main>
       <el-table
+        @select="handleSelect"
+        @select-all="handleSelectAll"
         v-loading="loading"
         :data="expressList"
         height="400"
         border
         style="width: 100%">
+        <el-table-column
+          type="selection"
+          width="50">
+        </el-table-column>
         <el-table-column
           prop="id"
           label="快递id"
@@ -50,7 +56,7 @@
         </el-table-column>
       </el-table>
       <el-button type="primary" class="footer-button"
-                 round @click="handOut">
+                 round @click="handleHandout">
         {{ handleButton }}
       </el-button>
     </el-main>
@@ -65,11 +71,13 @@ export default {
     return {
       type: 0,
       tableName: "",
-      apiParam: "",
+      getExpressParam: "",
       expressList: [],
       buildings: [],
       handleButton: "",
+      selected: [],
       loading: true,
+      newSelect: false,
     }
   },
   created() {
@@ -82,34 +90,35 @@ export default {
       switch (this.type) {
         case 0:
           this.tableName = "总仓快递管理";
-          this.apiParam = "get-express?divide=0";
+          this.getExpressParam = "get-express?divide=0";
           this.handleButton = "一键通知分发"
           break;
         case 1:
           this.tableName = this.$route.query.bulidng + "分仓快递管理";
-          this.apiParam = "get-express?divide=1&building=" + this.$route.query.bulidng;
+          this.getExpressParam = "get-express?divide=1&building=" + this.$route.query.bulidng;
           this.handleButton = "一键上架"
       }
     },
     getExpress() {
-      this.$axios.get(this.api + this.apiParam)
+      this.$axios.get(this.api + this.getExpressParam)
         .then(response => {
             this.expressList = response.data;
             let s = new Set();
             this.expressList.forEach(v => {
               if (v["receive_date"])
-                v["state"] = "已签收"
+                v["state"] = "已签收";
               else if (v["locate"])
-                v["state"] = "快递在" + v["building"] + "-" + v["locate"]
+                v["state"] = "快递在" + v["building"] + "-" + v["locate"];
               else if (v["is_divide"])
-                v["state"] = "已分发至" + v["building"]
+                v["state"] = "已分发至" + v["building"];
               else
-                v["state"] = v["is_notified"] ? "已通知工作人员分发" : "未通知分发"
+                v["state"] = v["is_notified"] ? "已通知工作人员分发" : "未通知分发";
 
               if (this.type === 0)
                 s.add(v["building"]);
 
             });
+            //生成筛选的filter数组
             for (let sKey of s) {
               let item = {
                 text: sKey,
@@ -117,6 +126,7 @@ export default {
               }
               this.buildings.push(item);
             }
+
             this.loading = false;
           }
         )//获取失败
@@ -128,13 +138,30 @@ export default {
       const property = column['property'];
       return row[property] === value;
     },
+    handleSelectAll(value) {
+      this.selected = value
+    },
+    handleSelect(value) {
+      this.selected = value
+    },
     // 分发快递
-    handOut() {
-
-      this.$message({
-        message: "通知成功",
-        type: "success"
+    handleHandout() {
+      //只提取快递id作为参数
+      let arr = [];
+      this.selected.forEach(i => {
+        arr.push({
+          id: i.id,
+        })
       });
+
+      //发起请求
+      this.$axios.post(this.api + "handout-express", arr).then(
+        response => {
+          this.$message.success(response.data);
+        }
+      ).catch(error => {
+        this.$message.error(error);
+      })
     },
   }
 }

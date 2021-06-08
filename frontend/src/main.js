@@ -7,7 +7,7 @@ import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css';
 // 用于和后台交互，发送请求
 import axios from 'axios';
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+axios.defaults.headers.post['Content-Type'] = 'application/json';
 Vue.prototype.$axios = axios;
 Vue.prototype.api = "https://shotgun.zone/api/";
 
