@@ -14,6 +14,20 @@ def test(request):
     return HttpResponse(request)
 
 
+def expressHandOUt(request):
+    res = None
+    if(len(request.body) == 0):
+        res = "没有要通知的快递！"
+    else:
+        data = json.loads(request.body)
+        for d in data:
+            E = ExpressInfo.objects.get(pk=d['id'])
+            E.is_notified = True
+            E.save()
+        res = data[0]['id']+"等"+str(len(data))+"个快递已通知成功！"
+
+    return HttpResponse(res)
+
 # 返回快递信息
 
 
@@ -27,6 +41,7 @@ def getExpress(request):
     return toJson(queryset)
 
 # 将Django的model对象的feild部分序列化成json
+# 注意里面将primarykey的标识改为id了
 
 
 def toJson(queryset):
