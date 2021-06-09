@@ -1,5 +1,5 @@
 from backend.models import ExpressInfo, MainWareHouseAdmin, Receiver, WareHouseWorker
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import Http404, HttpResponse, JsonResponse
 from django.core import serializers
 import random
 import json
@@ -17,12 +17,12 @@ def test(request):
 # 前端请求分发快递，参数为id数组
 
 
-def expressHandOUt(request):
+def expressHandOut(request):
     res = None
-    if(len(request.body) == 0):
+    data = json.loads(request.body)
+    if(len(data) == 0):
         res = "没有要通知的快递！"
     else:
-        data = json.loads(request.body)
         for d in data:
             E = ExpressInfo.objects.get(pk=d['id'])
             E.is_notified = True
@@ -66,13 +66,8 @@ def getWareHouse(request):
 
 
 def getExpress(request):
-    param = request.GET
-    queryset = None
-    if('divide' in param):
-        is_divide = (param['divide'] != '0')
-        queryset = ExpressInfo.objects.filter(is_divide=is_divide)
-    else:
-        queryset = ExpressInfo.objects.all()
+    param = json.loads(request.body)
+    queryset = ExpressInfo.objects.filter(**param)
     return toJson(queryset)
 
 # 将Django的model对象的feild部分序列化成json

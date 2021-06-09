@@ -55,9 +55,13 @@
                          label="签收时间">
         </el-table-column>
       </el-table>
-      <el-button type="primary" class="footer-button"
+      <el-button v-if="type===0" type="primary" class="footer-button"
                  round @click="handleHandout">
-        {{ handleButton }}
+        一键通知分发
+      </el-button>
+      <el-button v-else type="primary" class="footer-button"
+                 round @click="handleHandOn">
+        一键上架
       </el-button>
     </el-main>
   </el-container>
@@ -74,10 +78,10 @@ export default {
       getExpressParam: "",
       expressList: [],
       buildings: [],
-      handleButton: "",
       selected: [],
       loading: true,
       newSelect: false,
+      shelves: {},
     }
   },
   created() {
@@ -90,29 +94,48 @@ export default {
       switch (this.type) {
         case 0:
           this.tableName = "总仓快递管理";
-          this.getExpressParam = "get-express?divide=0";
-          this.handleButton = "一键通知分发"
+          this.getExpressParam = {
+            is_divide: false
+          };
           break;
+        //分仓管理员
         case 1:
-          this.tableName = this.$route.query.bulidng + "分仓快递管理";
-          this.getExpressParam = "get-express?divide=1&building=" + this.$route.query.bulidng;
-          this.handleButton = "一键上架"
+          this.tableName = this.$route.query.building + "分仓快递管理";
+          this.getExpressParam = {
+            is_divide: false,
+            is_notified: true,
+            building: this.$route.query.building
+          };
+          this.shelves = new Set();
+          break;
       }
     },
+    updateState() {
+      this.expressList.forEach(v => {
+        let notifyTips = ""
+        switch (this.type) {
+          case 0:
+            notifyTips = "已通知工作人员分发";
+            break;
+          case 1:
+            notifyTips = "待领取";
+            break;
+        }
+        if (v["receive_date"])
+          v["state"] = "已签收";
+        else if (v["locate"])
+          v["state"] = "快递在" + v["building"] + "-" + v["locate"];
+        else if (v["is_divide"])
+          v["state"] = "已分发至" + v["building"];
+        else
+          v["state"] = v["is_notified"] ? notifyTips : "未通知分发";
+      });
+    },
     getExpress() {
-      this.$axios.get(this.api + this.getExpressParam)
+      this.$axios.post(this.api + "get-express", this.getExpressParam)
         .then(response => {
             this.expressList = response.data;
-            this.expressList.forEach(v => {
-              if (v["receive_date"])
-                v["state"] = "已签收";
-              else if (v["locate"])
-                v["state"] = "快递在" + v["building"] + "-" + v["locate"];
-              else if (v["is_divide"])
-                v["state"] = "已分发至" + v["building"];
-              else
-                v["state"] = v["is_notified"] ? "已通知工作人员分发" : "未通知分发";
-            });
+            this.updateState();
             this.initFilterList();
             this.loading = false;
           }
@@ -152,6 +175,7 @@ export default {
       //只提取快递id作为参数
       let arr = [];
       this.selected.forEach(i => {
+        i.state = "已通知工作人员分发"
         arr.push({
           id: i.id,
         })
@@ -165,6 +189,45 @@ export default {
       ).catch(error => {
         this.$message.error(error);
       })
+    },
+    //随机生成货架
+    generalShelves() {
+      let res = null
+      let alp = ['A', 'B', 'C', 'D']
+      let num = Math.random()
+      num = Math.floor(num * 4)
+      res = alp[num]
+      num = Math.random()
+      num = ('000000' + Math.floor(num * 100000)).slice(-6);
+      res += num[0] + '-' + num[1] + '-' + num.slice(2)
+      if (res in this.shelves)
+        res = this.generalShelves()
+      else
+        this.shelves.add(res)
+      return res
+    },
+    //上架快递
+    handleHandOn() {
+      //只提取快递id作为参数
+      let arr = [];
+      this.selected.forEach(i => {
+        if (!i.locate)
+          i.locate = this.generalShelves()
+        i.state = "已上架" + i.locate
+        arr.push({
+          id: i.id,
+          locate: i.locate,
+        })
+      });
+      console.log(arr)
+      //发起请求
+      // this.$axios.post(this.api + "handout-express", []).then(
+      //   response => {
+      //     this.$message.success(response.data);
+      //   }
+      // ).catch(error => {
+      //   this.$message.error(error);
+      // })
     },
   }
 }

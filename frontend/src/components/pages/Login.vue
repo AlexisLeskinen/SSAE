@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       form: {
-        account: '00000',
+        account: '00400',
         password: '123456'
       },
 
@@ -63,22 +63,6 @@ export default {
       }).catch(error => {
         this.$message.error(error);
       });
-      // 为表单绑定验证功能
-      // this.$refs[formName].validate((valid) => {
-      //   if (valid) {
-      //     // 使用 vue-router 路由到指定页面，该方式称之为编程式导航
-      //     this.$router.push({
-      //       path: "/express-handle",
-      //       query: {
-      //         type: 0,
-      //         // building:"C1",
-      //       }
-      //     });
-      //   } else {
-      //     this.dialogVisible = true;
-      //     return false;
-      //   }
-      // });
     }
   }
 }
