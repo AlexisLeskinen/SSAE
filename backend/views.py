@@ -1,4 +1,4 @@
-from backend.models import ExpressInfo, Receiver, WareHouseWorker
+from backend.models import ExpressInfo, MainWareHouseAdmin, Receiver, WareHouseWorker
 from django.http.response import HttpResponse, JsonResponse
 from django.core import serializers
 import random
@@ -9,8 +9,12 @@ from faker import Faker
 
 
 def test(request):
+    t = ExpressInfo.objects.all()[:5:1]
+    data = list(t)
 
-    return HttpResponse(request)
+    return HttpResponse(data)
+
+# 前端请求分发快递，参数为id数组
 
 
 def expressHandOUt(request):
@@ -27,13 +31,45 @@ def expressHandOUt(request):
 
     return HttpResponse(res)
 
+# 仓库管理员登陆
+
+
+def loginHandle(request):
+    param = json.loads(request.body)
+    res = None
+    user = WareHouseWorker.objects.filter(employee_id=param['account'])
+    if(len(user)):
+        res = {
+            'type': 1,
+            'building': user[0].building
+        }
+    else:
+        user = MainWareHouseAdmin.objects.filter(employee_id=param['account'])
+        if(len(user)):
+            res = {
+                'type': 0
+            }
+
+    return JsonResponse(res)
+
+# 获取所有仓库
+
+
+def getWareHouse(request):
+    queryset = ExpressInfo.objects.values(
+        'building').distinct().order_by('building')
+    data = list(queryset)
+
+    return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
+
 # 返回快递信息
 
 
 def getExpress(request):
+    param = request.GET
     queryset = None
-    if('divide' in request.GET):
-        is_divide = (request.GET['divide'] != '0')
+    if('divide' in param):
+        is_divide = (param['divide'] != '0')
         queryset = ExpressInfo.objects.filter(is_divide=is_divide)
     else:
         queryset = ExpressInfo.objects.all()
@@ -86,7 +122,7 @@ def generalReceiver(request):
                      )
         R.save()
 
-    return JsonResponse(toJson(Receiver), safe=False, json_dumps_params={'ensure_ascii': False})
+    return HttpResponse("!")
 
 
 # 随机生成分仓人员
@@ -106,4 +142,4 @@ def generalWarehouseWorker(request):
                             building=building, employee_id=id)
         W.save()
 
-    return JsonResponse(toJson(WareHouseWorker), safe=False, json_dumps_params={'ensure_ascii': False})
+    return HttpResponse("!")

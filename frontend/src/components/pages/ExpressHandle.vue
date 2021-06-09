@@ -81,11 +81,11 @@ export default {
     }
   },
   created() {
-    this.initTable();
+    this.initTableApi();
     this.getExpress();
   },
   methods: {
-    initTable() {
+    initTableApi() {
       this.type = Number(this.$route.query.type);
       switch (this.type) {
         case 0:
@@ -103,7 +103,6 @@ export default {
       this.$axios.get(this.api + this.getExpressParam)
         .then(response => {
             this.expressList = response.data;
-            let s = new Set();
             this.expressList.forEach(v => {
               if (v["receive_date"])
                 v["state"] = "已签收";
@@ -113,26 +112,30 @@ export default {
                 v["state"] = "已分发至" + v["building"];
               else
                 v["state"] = v["is_notified"] ? "已通知工作人员分发" : "未通知分发";
-
-              if (this.type === 0)
-                s.add(v["building"]);
-
             });
-            //生成筛选的filter数组
-            for (let sKey of s) {
-              let item = {
-                text: sKey,
-                value: sKey,
-              }
-              this.buildings.push(item);
-            }
-
+            this.initFilterList();
             this.loading = false;
           }
         )//获取失败
         .catch(error => {
           console.log(error);
         })
+    },
+    initFilterList() {
+      this.$axios.get(this.api + "get-warehouse")
+        .then(response => {
+            response.data.forEach((v) => {
+              let item = {
+                text: v['building'],
+                value: v['building'],
+              }
+              this.buildings.push(item);
+            });
+          }
+        )//获取失败
+        .catch(error => {
+          this.$message.error(error);
+        });
     },
     filterHandler(value, row, column) {
       const property = column['property'];
