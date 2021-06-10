@@ -1,0 +1,106 @@
+import random
+from faker import Faker
+from backend.models import buildings
+
+
+class DataGenerator(object):
+    cfacker = Faker('zh_CN')
+    sexoption = "男女"
+
+    def baseinfo(self, number):
+        """
+        @description: 
+        随机生成基础人物信息
+        ---------
+        @param: 生成数量
+        -------
+        @Returns: json数组
+        -------
+        """
+
+        res = []
+        for _ in range(number):
+            b = {
+                'name': self.cfacker.name(),
+                'sex': self.sexoption[random.randrange(0, 2)],
+                'phone': self.cfacker.phone_number(),
+                'building': buildings[random.randrange(1, 13)][0],
+                'password': "0000"
+            }
+            res.append(b)
+        return res
+
+    def receiver(self, number):
+        """
+        @description: 
+        随机生成收件人信息
+        ---------
+        @param: number，生成的数量
+        -------
+        @Returns: json数组
+        -------
+        """
+
+        res = self.baseinfo(number)
+        for r in res:
+            t = {
+                'receive_id': str(random.randrange(1, 100000)).zfill(5),
+                'self_service': random.randrange(0, 2),
+                'door': str(random.randrange(1, 10000)).zfill(4)
+            }
+            r.update(t)
+
+        return res
+
+    def woker(self, number):
+        """
+        @description: 
+        随机生成工作人员信息
+        ---------
+        @param: 生成数量
+        -------
+        @Returns: json数组
+        -------
+        """
+
+        res = self.baseinfo(number)
+
+        for r in res:
+            t = {
+                'employee_id': str(random.randrange(1, 100000)).zfill(5),
+                'level': random.randrange(1, 3)
+            }
+            r.update(t)
+
+        return res
+
+    def express(self, number):
+        """
+        @description: 
+        随机生成快递信息，注意要现有收件人信息
+        ---------
+        @param: 生成数量
+        -------
+        @Returns: json数组
+        -------
+        """
+
+        res = []
+
+        for _ in range(number):
+            n = random.randrange(0, 2)
+            d = 0
+            if(n):
+                d = random.randrange(0, 2)
+            e = {
+                'express_id': str(random.randrange(1, 10000000)).zfill(7),
+                'is_notified': n,
+                'is_divided': d
+            }
+
+            res.append(e)
+
+        return res
+
+
+G = DataGenerator()

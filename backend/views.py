@@ -1,176 +1,190 @@
-from backend.models import ExpressInfo, MainWareHouseAdmin, Receiver, WareHouseWorker
-from django.http.response import Http404, HttpResponse, JsonResponse
-from django.core import serializers
-import random
+from backend.models import Express, Receiver, WareHouseWorker, buildings
+from django.http.response import HttpResponse, JsonResponse
+from backend.DataGenerator import G
 import json
-# 假数据生成包
-from faker import Faker
-# Create your views here.
 
 
 def test(request):
-    t = ExpressInfo.objects.all()[:5:1]
-    data = list(t)
-
-    return HttpResponse(data)
-
-# 快递上架
-
-
-def expressHandOn(request):
-    res = None
-    data = json.loads(request.body)
-    if(len(data) == 0):
-        res = "没有要上架的快递！"
-    else:
-        for d in data:
-            E = ExpressInfo.objects.get(pk=d['id'])
-            E.locate = d['locate']
-            E.save()
-        res = data[0]['id']+"等"+str(len(data))+"个快递已上架成功！"
-
-    return HttpResponse(res)
-
-# 前端请求快递取件，参数为id数组
+    E = Express.objects.first()
+    kwgs = {
+        "locate": "A1-2-5531"
+    }
+    E.change(**kwgs)
+    E.save()
+    return resultReturn(E.toJson())
 
 
-def expressDivided(request):
-    res = None
-    data = json.loads(request.body)
-    if(len(data) == 0):
-        res = "没有要取件的快递！"
-    else:
-        for d in data:
-            E = ExpressInfo.objects.get(pk=d['id'])
-            E.is_divide = True
-            E.save()
-        res = data[0]['id']+"等"+str(len(data))+"个快递已取件成功！"
+def resultReturn(data=[], msg="操作成功!"):
+    """
+    @description: 
+    封装了一下返回结果
+    ---------
+    @param: data是一个json，msg是提示信息
+    -------
+    @Returns: 
+    -------
+    """
 
-    return HttpResponse(res)
-
-# 前端请求通知分发快递，参数为id数组
-
-
-def expressNotified(request):
-    res = None
-    data = json.loads(request.body)
-    if(len(data) == 0):
-        res = "没有要通知的快递！"
-    else:
-        for d in data:
-            E = ExpressInfo.objects.get(pk=d['id'])
-            E.is_notified = True
-            E.save()
-        res = data[0]['id']+"等"+str(len(data))+"个快递已通知成功！"
-
-    return HttpResponse(res)
-
-# 仓库管理员登陆
-# 返回前端必需的页面字段
-
-
-def loginHandle(request):
-    param = json.loads(request.body)
-    res = None
-    user = WareHouseWorker.objects.filter(employee_id=param['account'])
-    if(len(user)):
-        res = {
-            'type': 1,
-            'building': user[0].building
-        }
-    else:
-        user = MainWareHouseAdmin.objects.filter(employee_id=param['account'])
-        if(len(user)):
-            res = {
-                'type': 0
-            }
+    res = {
+        'msg': msg,
+        'data': data
+    }
 
     return JsonResponse(res)
 
-# 获取所有仓库
+
+def expressUpdate(request):
+    """
+    @description: 
+    更新快递通知状态、分发状态等
+    ---------
+    @param: 更新字段的json数组
+    -------
+    @Returns: 
+    -------
+    """
+
+    res = None
+    if(request.body):
+        param = json.loads(request.body)
+        if(len(param) == 0):
+            res = "没有要更新的快递！"
+        else:
+            for d in param:
+                E = Express.objects.get(pk=d['id'])
+                E.change(**d)
+                E.save()
+            res = param[0]['id']+"等"+str(len(param))+"个快递更新知成功！"
+
+    return resultReturn(msg=res)
+
+
+def loginVerify(request):
+    """
+    @description: 
+    登陆验证，验证员工id是否存在标注
+    ---------
+    @param: 帐号和密码的json
+    -------
+    @Returns: 员工类型和所属仓库
+    -------
+    """
+
+    param = json.loads(request.body)
+    res = {}
+    quryset = WareHouseWorker.objects.filter(
+        employee_id=param['account'], password=param['password'])
+    if(len(quryset)):
+        account = quryset[0]
+        res = {
+            'type': account.level,
+            'building': account.building
+        }
+
+    return resultReturn(data=res)
 
 
 def getWareHouse(request):
-    queryset = ExpressInfo.objects.values(
-        'building').distinct().order_by('building')
-    data = list(queryset)
+    """
+    @description: 
+    获取所有仓库信息
+    ---------
+    @param: 无
+    -------
+    @Returns: (C1,C1)类型的数组
+    -------
+    """
 
-    return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
-
-# 返回快递信息
+    return resultReturn(buildings)
 
 
 def getExpress(request):
-    # 动态获取快递信息
+    """
+    @description: 
+    获取快递信息
+    ---------
+    @param: 包含要查询字段的json
+    -------
+    @Returns: Json
+    -------
+    """
+
     param = json.loads(request.body)
-    queryset = ExpressInfo.objects.filter(**param)
-    return toJson(queryset)
-
-# 将Django的model对象的feild部分序列化成json
-# 注意里面将primarykey的标识改为id了
-
-
-def toJson(queryset):
-    tempdata = serializers.serialize("json", queryset)
-    tempdata = json.loads(tempdata)
+    queryset = Express.objects.filter(**param)
     data = []
-    for d in tempdata:
-        d["fields"]["id"] = d["pk"]
-        data.append(d["fields"])
-    return JsonResponse(data, safe=False, json_dumps_params={'ensure_ascii': False})
+    for q in queryset:
+        data.append(q.toJson())
+    return resultReturn(data=data)
 
 
-# 随机生成快递数据，写入数据库
+def newReciver(request):
+    """
+    @description: 
+    随机生成收件人
+    ---------
+    @param: get请求中的num参数
+    -------
+    @Returns: 
+    -------
+    """
+    param = request.GET
+    num = int(param['num'])
 
-def generalExpress(request):
-    fake = Faker("zh_CN")
-
-    name = fake.name()
-    id = str(random.randrange(1, 10000000)).zfill(7)
-    building = "C" + str(random.randint(1, 12))
-    phone = fake.phone_number()
-
-    E = ExpressInfo(express_id=id, receiver=name,
-                    building=building, phone=phone)
-    E.save()
-
-    return HttpResponse(E.express_id)
-
-
-def generalReceiver(request):
-    Einfos = toJson(ExpressInfo)
-
-    for e in Einfos:
-        name = e['receiver']
-        sex = "男女"[random.randrange(0, 2)]
-        phone = e['phone']
-        id = str(random.randrange(1, 100000000)).zfill(8)
-        selfservice = random.randrange(0, 2)
-        building = e['building']
-        R = Receiver(name=name, sex=sex, phone=phone,
-                     receive_id=id, self_service=selfservice,
-                     building=building
-                     )
-        R.save()
-
-    return HttpResponse("!")
+    Rs = G.receiver(num)
+    before = Receiver.objects.count()
+    for r in Rs:
+        if(Receiver.objects.filter(r['receive_id']).count == 0):
+            t = Receiver(**r)
+            t.save()
+    after = Receiver.objects.count()
+    return resultReturn(msg="成功生成"+str(after-before)+"个收件人！")
 
 
-# 随机生成分仓人员
-def generalWarehouseWorker(request):
-    fake = Faker("zh_CN")
+def newWorker(request):
+    """
+    @description: 
+    随机生成工作人员
+    ---------
+    @param: get请求中的num参数
+    -------
+    @Returns: 
+    -------
+    """
 
-    for i in range(13):
-        name = fake.name()
-        id = str(random.randrange(1, 100000)).zfill(5)
-        phone = fake.phone_number()
-        sex = "男女"[random.randrange(0, 2)]
-        building = "C" + str(i)
-        level = 1
+    param = request.GET
+    num = int(param['num'])
+    Ws = G.woker(num)
+    before = WareHouseWorker.objects.count()
+    for w in Ws:
+        if(WareHouseWorker.objects.filter(w['employee_id']).count == 0):
+            t = WareHouseWorker(**w)
+            t.save()
+    after = WareHouseWorker.objects.count()
+    return resultReturn(msg="成功生成"+str(after-before)+"个工作人员！")
 
-        W = WareHouseWorker(name=name, sex=sex,
-                            phone=phone, level=level,
-                            building=building, employee_id=id)
-        W.save()
 
-    return HttpResponse("!")
+def newExpress(request):
+    """
+    @description: 
+    随机生快递，注意，要先生成收件人
+    ---------
+    @param: get请求中的num参数
+    -------
+    @Returns: 
+    -------
+    """
+
+    param = request.GET
+    num = int(param['num'])
+    # 如果没有收件人，则先生成
+    if(not Receiver.objects.count()):
+        newReciver(request)
+    Es = G.express(num)
+    before = Express.objects.count()
+    for e in Es:
+        e.update({'receiver': Receiver.objects.order_by("?").first()})
+        if(Express.objects.filter(e['express_id']).count == 0):
+            t = Express(**e)
+            t.save()
+    after = Express.objects.count()
+    return resultReturn(msg="成功生成"+str(after-before)+"个快递！")

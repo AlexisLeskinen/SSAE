@@ -6,10 +6,11 @@ from django.urls import path
 # 这里添加api后面的url操作
 urlpatterns = [
     path('test', test),
-    path('login', loginHandle),
+    path('login', loginVerify),
     path('get-express', getExpress),
     path('get-warehouse', getWareHouse),
-    path('express-notified', expressNotified),
-    path('express-divided', expressDivided),
-    path('express-handon', expressHandOn),
+    path('express-update', expressUpdate),
+    path('new-reciver', newReciver),
+    path('new-worker', newWorker),
+    path('new-express', newExpress),
 ]

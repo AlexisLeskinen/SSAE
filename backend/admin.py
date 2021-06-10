@@ -5,14 +5,10 @@ from django.contrib import admin
 
 
 class ExpressList(admin.ModelAdmin):
-    list_display = ('express_id', 'receiver', 'phone')
+    list_display = ('express_id', 'receiver')
 
 
-class MWAdminList(admin.ModelAdmin):
-    list_display = ('employee_id', 'name', 'sex')
-
-
-class WWokerList(admin.ModelAdmin):
+class WareHouseWorkerList(admin.ModelAdmin):
     list_display = ('employee_id', 'name', 'sex')
 
 
@@ -20,7 +16,6 @@ class ReceiverList(admin.ModelAdmin):
     list_display = ('receive_id', 'name', 'phone')
 
 
-admin.site.register(ExpressInfo, ExpressList)
-admin.site.register(MainWareHouseAdmin, MWAdminList)
-admin.site.register(WareHouseWorker, WWokerList)
+admin.site.register(Express, ExpressList)
+admin.site.register(WareHouseWorker, WareHouseWorkerList)
 admin.site.register(Receiver, ReceiverList)

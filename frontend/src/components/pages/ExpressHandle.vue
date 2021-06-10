@@ -102,7 +102,7 @@ export default {
         case 0:
           this.tableName = "总仓快递管理";
           this.getExpressParam = {
-            is_divide: false
+            is_divided: false
           };
           break;
         //分仓管理员
