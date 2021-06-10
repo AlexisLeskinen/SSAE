@@ -9,5 +9,7 @@ urlpatterns = [
     path('login', loginHandle),
     path('get-express', getExpress),
     path('get-warehouse', getWareHouse),
-    path('handout-express', expressHandOut),
+    path('express-notified', expressNotified),
+    path('express-divided', expressDivided),
+    path('express-handon', expressHandOn),
 ]

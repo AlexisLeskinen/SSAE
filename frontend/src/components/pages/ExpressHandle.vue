@@ -14,6 +14,7 @@
         :data="expressList"
         height="400"
         border
+        stripe
         style="width: 100%">
         <el-table-column
           type="selection"
@@ -56,13 +57,19 @@
         </el-table-column>
       </el-table>
       <el-button v-if="type===0" type="primary" class="footer-button"
-                 round @click="handleHandout">
-        一键通知分发
+                 round @click="handleExpress('express-notified')">
+        通知分发快递
       </el-button>
-      <el-button v-else type="primary" class="footer-button"
-                 round @click="handleHandOn">
-        一键上架
-      </el-button>
+      <div v-else class="footer-button">
+        <el-button type="plain"
+                   round @click="handleExpress('express-divided')">
+          领取快递
+        </el-button>
+        <el-button type="primary"
+                   round @click="handleHandOn">
+          上架快递
+        </el-button>
+      </div>
     </el-main>
   </el-container>
 </template>
@@ -102,7 +109,6 @@ export default {
         case 1:
           this.tableName = this.$route.query.building + "分仓快递管理";
           this.getExpressParam = {
-            is_divide: false,
             is_notified: true,
             building: this.$route.query.building
           };
@@ -131,6 +137,7 @@ export default {
           v["state"] = v["is_notified"] ? notifyTips : "未通知分发";
       });
     },
+    // 获取快递信息
     getExpress() {
       this.$axios.post(this.api + "get-express", this.getExpressParam)
         .then(response => {
@@ -144,6 +151,7 @@ export default {
           console.log(error);
         })
     },
+    // 初始化筛选列表的楼号
     initFilterList() {
       this.$axios.get(this.api + "get-warehouse")
         .then(response => {
@@ -170,21 +178,27 @@ export default {
     handleSelect(value) {
       this.selected = value
     },
-    // 分发快递
-    handleHandout() {
-      //只提取快递id作为参数
+    //获取被选中的快递id
+    getSelectedId() {
       let arr = [];
       this.selected.forEach(i => {
-        i.state = "已通知工作人员分发"
         arr.push({
           id: i.id,
         })
       });
+      return arr
+    },
+    // 通知分发快递||领取快递
+    handleExpress(url) {
+      //只提取快递id作为参数
+      let param = this.getSelectedId();
 
       //发起请求
-      this.$axios.post(this.api + "handout-express", arr).then(
+      this.$axios.post(this.api + url, param).then(
         response => {
           this.$message.success(response.data);
+          if (param.length)
+            this.getExpress();
         }
       ).catch(error => {
         this.$message.error(error);
@@ -211,23 +225,26 @@ export default {
       //只提取快递id作为参数
       let arr = [];
       this.selected.forEach(i => {
-        if (!i.locate)
-          i.locate = this.generalShelves()
-        i.state = "已上架" + i.locate
-        arr.push({
-          id: i.id,
-          locate: i.locate,
-        })
+        if (i.is_divide) {
+          if (!i.locate)
+            i.locate = this.generalShelves()
+          arr.push({
+            id: i.id,
+            locate: i.locate,
+          })
+        }
       });
-      console.log(arr)
+      // console.log(arr)
       //发起请求
-      // this.$axios.post(this.api + "handout-express", []).then(
-      //   response => {
-      //     this.$message.success(response.data);
-      //   }
-      // ).catch(error => {
-      //   this.$message.error(error);
-      // })
+      this.$axios.post(this.api + "express-handon", arr).then(
+        response => {
+          this.$message.success(response.data);
+          if (arr.length)
+            this.getExpress();
+        }
+      ).catch(error => {
+        this.$message.error(error);
+      })
     },
   }
 }

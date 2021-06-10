@@ -14,10 +14,44 @@ def test(request):
 
     return HttpResponse(data)
 
-# 前端请求分发快递，参数为id数组
+# 快递上架
 
 
-def expressHandOut(request):
+def expressHandOn(request):
+    res = None
+    data = json.loads(request.body)
+    if(len(data) == 0):
+        res = "没有要上架的快递！"
+    else:
+        for d in data:
+            E = ExpressInfo.objects.get(pk=d['id'])
+            E.locate = d['locate']
+            E.save()
+        res = data[0]['id']+"等"+str(len(data))+"个快递已上架成功！"
+
+    return HttpResponse(res)
+
+# 前端请求快递取件，参数为id数组
+
+
+def expressDivided(request):
+    res = None
+    data = json.loads(request.body)
+    if(len(data) == 0):
+        res = "没有要取件的快递！"
+    else:
+        for d in data:
+            E = ExpressInfo.objects.get(pk=d['id'])
+            E.is_divide = True
+            E.save()
+        res = data[0]['id']+"等"+str(len(data))+"个快递已取件成功！"
+
+    return HttpResponse(res)
+
+# 前端请求通知分发快递，参数为id数组
+
+
+def expressNotified(request):
     res = None
     data = json.loads(request.body)
     if(len(data) == 0):
@@ -32,6 +66,7 @@ def expressHandOut(request):
     return HttpResponse(res)
 
 # 仓库管理员登陆
+# 返回前端必需的页面字段
 
 
 def loginHandle(request):
@@ -66,6 +101,7 @@ def getWareHouse(request):
 
 
 def getExpress(request):
+    # 动态获取快递信息
     param = json.loads(request.body)
     queryset = ExpressInfo.objects.filter(**param)
     return toJson(queryset)

@@ -56,12 +56,13 @@ export default {
         account: this.form.account,
         password: this.form.password,
       }).then(response => {
+        this.$message.success("登陆成功！")
         this.$router.push({
           path: "/express-handle",
           query: response.data
         });
       }).catch(error => {
-        this.$message.error(error);
+        console.log(error);
       });
     }
   }
