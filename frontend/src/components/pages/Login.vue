@@ -1,7 +1,7 @@
 <template>
   <div>
-    <el-form ref="loginForm" :model="form" :rules="rules" label-width="80px" class="login-box">
-      <h3 class="login-title">欢迎登录</h3>
+    <el-form :model="form" :rules="rules" label-width="80px" class="login-box">
+      <h3 class="login-title">管理员登陆</h3>
       <el-form-item label="员工ID" prop="account">
         <el-input type="text" placeholder="请输入账号" v-model="form.account"/>
       </el-form-item>
@@ -9,15 +9,14 @@
         <el-input type="password" placeholder="请输入密码" v-model="form.password"/>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" v-on:click="onSubmit('loginForm')">登录</el-button>
+        <el-button type="primary" v-on:click="onSubmit()">登录</el-button>
       </el-form-item>
     </el-form>
 
     <el-dialog
       title="温馨提示"
       :visible.sync="dialogVisible"
-      width="30%"
-    >
+      width="30%">
       <span>请输入账号和密码</span>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
@@ -32,8 +31,8 @@ export default {
   data() {
     return {
       form: {
-        account: '00400',
-        password: '123456'
+        account: '36008',
+        password: '0000'
       },
 
       // 表单验证，需要在 el-form-item 元素中增加 prop 属性
@@ -51,16 +50,18 @@ export default {
     }
   },
   methods: {
-    onSubmit(formName) {
-      this.$axios.post(this.api + 'login', {
-        account: this.form.account,
-        password: this.form.password,
-      }).then(response => {
-        this.$message.success("登陆成功！")
-        this.$router.push({
-          path: "/express-handle",
-          query: response.data
-        });
+    onSubmit() {
+      this.$axios.post(this.api + 'log-in', this.form).then(response => {
+        switch (response.data.code) {
+          case 200:
+            this.$message.success(response.data.msg)
+            this.$router.push({
+              path: "/express-handle"
+            });
+            break;
+          default:
+            this.$message.error(response.data.msg)
+        }
       }).catch(error => {
         console.log(error);
       });

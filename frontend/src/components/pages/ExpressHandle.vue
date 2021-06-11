@@ -1,9 +1,15 @@
 <template>
   <el-container class="main-table">
     <el-header>
-      <div class="header-title">
-        <i class="el-icon-user"></i>
-        <span>{{ tableName }}</span>
+      <div>
+        <div class="header-left">
+          <span>{{ tableName }}</span>
+        </div>
+        <div class="header-right">
+          <i class="el-icon-user" style="font-size: 30px;"></i>
+          <el-link :underline="false">{{ user }}</el-link>
+          <el-link :underline="false" @click="logout">注销</el-link>
+        </div>
       </div>
     </el-header>
     <el-main>
@@ -21,23 +27,16 @@
           width="50">
         </el-table-column>
         <el-table-column
-          prop="id"
+          prop="express_id"
           label="快递id"
           width="120">
         </el-table-column>
         <el-table-column
-          prop="receiver"
+          prop="name"
           label="姓名"
           width="120">
         </el-table-column>
-        <el-table-column v-if="type===0"
-                         prop="building"
-                         :filters="buildings"
-                         :filter-method="filterHandler"
-                         width="100"
-                         label="地址">
-        </el-table-column>
-        <el-table-column v-else
+        <el-table-column v-if="type===1"
                          prop="locate"
                          width="100"
                          label="放置位置">
@@ -50,19 +49,27 @@
           prop="state"
           label="快递状态" align="center">
         </el-table-column>
-        <!--        分仓功能-->
-        <el-table-column v-if="type===1"
-                         prop="receive_date"
-                         label="签收时间">
+        <el-table-column
+          prop="s_s_t"
+          label="自主取件">
         </el-table-column>
+        <div v-if="type===0">
+          <el-table-column
+            prop="building"
+            :filters="buildings"
+            :filter-method="filterHandler"
+            width="100"
+            label="地址">
+          </el-table-column>
+        </div>
       </el-table>
       <el-button v-if="type===0" type="primary" class="footer-button"
-                 round @click="handleExpress('express-notified')">
+                 round @click="updateExpress({'is_notified':true})">
         通知分发快递
       </el-button>
       <div v-else class="footer-button">
         <el-button type="plain"
-                   round @click="handleExpress('express-divided')">
+                   round @click="updateExpress({'is_divided':true})">
           领取快递
         </el-button>
         <el-button type="primary"
@@ -81,68 +88,76 @@ export default {
   data() {
     return {
       type: 0,
+      user: "",
       tableName: "",
-      getExpressParam: "",
+      getExpressParam: {},
       expressList: [],
       buildings: [],
       selected: [],
       loading: true,
-      newSelect: false,
       shelves: {},
     }
   },
   created() {
     this.initTableApi();
-    this.getExpress();
   },
   methods: {
     initTableApi() {
-      this.type = Number(this.$route.query.type);
-      switch (this.type) {
-        case 0:
-          this.tableName = "总仓快递管理";
-          this.getExpressParam = {
-            is_divided: false
-          };
-          break;
-        //分仓管理员
-        case 1:
-          this.tableName = this.$route.query.building + "分仓快递管理";
-          this.getExpressParam = {
-            is_notified: true,
-            building: this.$route.query.building
-          };
-          this.shelves = new Set();
-          break;
-      }
-    },
-    updateState() {
-      this.expressList.forEach(v => {
-        let notifyTips = ""
-        switch (this.type) {
-          case 0:
-            notifyTips = "已通知工作人员分发";
-            break;
-          case 1:
-            notifyTips = "待领取";
-            break;
+
+      this.$axios.get(this.api + 'admin-type').then(
+        response => {
+          let result = response.data
+          switch (result.code) {
+            case 200:
+              this.type = Number(result.data.type)
+              switch (this.type) {
+                //总仓管理员
+                case 0:
+                  this.tableName = "总仓快递管理";
+                  this.getExpressParam = {
+                    is_divided: false
+                  };
+                  break;
+                //分仓管理员
+                case 1:
+                  this.tableName = result.data.building + "分仓快递管理";
+                  this.getExpressParam = {
+                    is_notified: true,
+                    receiver__building: result.data.building
+                  };
+                  this.shelves = new Set();
+                  break;
+              }
+              this.user = result.data.user;
+              break;
+            default:
+              this.logout();
+              break;
+          }
+          this.getExpress();
         }
-        if (v["receive_date"])
-          v["state"] = "已签收";
-        else if (v["locate"])
-          v["state"] = "快递在" + v["building"] + "-" + v["locate"];
-        else if (v["is_divide"])
-          v["state"] = "已分发至" + v["building"];
-        else
-          v["state"] = v["is_notified"] ? notifyTips : "未通知分发";
+      ).catch(error => {
+        this.logout();
+        console.log(error);
+      })
+    },
+    //登出
+    logout() {
+      this.$axios.get(this.api + 'log-out').then(
+        r => {
+          this.$message.success(r.data.msg)
+        }
+      )
+      this.$router.push({
+        path: "/login"
       });
     },
     // 获取快递信息
     getExpress() {
       this.$axios.post(this.api + "get-express", this.getExpressParam)
         .then(response => {
-            this.expressList = response.data;
-            this.updateState();
+            // console.log(response.data)
+            this.expressList = response.data.data;
             this.initFilterList();
             this.loading = false;
           }
@@ -155,19 +170,27 @@ export default {
     initFilterList() {
       this.$axios.get(this.api + "get-warehouse")
         .then(response => {
-            response.data.forEach((v) => {
-              let item = {
-                text: v['building'],
-                value: v['building'],
-              }
-              this.buildings.push(item);
+            let result = response.data;
+            this.buildings = []
+            result.data.forEach(i => {
+              this.buildings.push({
+                text: i,
+                value: i
+              })
             });
           }
         )//获取失败
         .catch(error => {
-          this.$message.error(error);
+          console.log(error)
         });
     },
+    /**
+     *
+     * @param value 筛选的值
+     * @param row 行
+     * @param column 列
+     * @returns {boolean}
+     */
     filterHandler(value, row, column) {
       const property = column['property'];
       return row[property] === value;
@@ -178,33 +201,44 @@ export default {
     handleSelect(value) {
       this.selected = value
     },
-    //获取被选中的快递id
-    getSelectedId() {
+    /**
+     * 生成更新数组
+     * @param mode  要跟新的字段，字典
+     * @returns {*[]}
+     */
+    getSelectedId(mode) {
       let arr = [];
       this.selected.forEach(i => {
-        arr.push({
-          id: i.id,
-        })
+        let t = {
+          express_id: i.express_id,
+          ...mode
+        }
+        arr.push(t)
       });
       return arr
     },
-    // 通知分发快递||领取快递
-    handleExpress(url) {
-      //只提取快递id作为参数
-      let param = this.getSelectedId();
+    /**
+     * 更新快递状态
+     * @param mode  更新的字段
+     */
+    updateExpress(mode) {
+      let param = this.getSelectedId(mode);
 
       //发起请求
-      this.$axios.post(this.api + url, param).then(
+      this.$axios.post(this.api + "express-update", param).then(
         response => {
-          this.$message.success(response.data);
+          this.$message.success(response.data.msg);
           if (param.length)
             this.getExpress();
         }
       ).catch(error => {
-        this.$message.error(error);
+        console.log(error)
       })
     },
-    //随机生成货架
+    /**随机生成货架号
+     * 范围为A0-0-0000到B9-9-9999
+     * @returns {string}
+     */
     generalShelves() {
       let res = null
       let alp = ['A', 'B', 'C', 'D']
@@ -214,36 +248,37 @@ export default {
       num = Math.random()
       num = ('000000' + Math.floor(num * 100000)).slice(-6);
       res += num[0] + '-' + num[1] + '-' + num.slice(2)
+      //不能有重复的货架号
       if (res in this.shelves)
         res = this.generalShelves()
       else
         this.shelves.add(res)
       return res
     },
-    //上架快递
+    /**上架快递
+     * 注意非自主取件不能上架
+     */
     handleHandOn() {
-      //只提取快递id作为参数
-      let arr = [];
+      let param = [];
       this.selected.forEach(i => {
-        if (i.is_divide) {
+        if (i.is_divided && !i["self_service"]) {
           if (!i.locate)
-            i.locate = this.generalShelves()
-          arr.push({
-            id: i.id,
+            i.locate = this.generalShelves();
+          param.push({
+            express_id: i.express_id,
             locate: i.locate,
           })
         }
       });
-      // console.log(arr)
       //发起请求
-      this.$axios.post(this.api + "express-handon", arr).then(
+      this.$axios.post(this.api + "express-update", param).then(
         response => {
-          this.$message.success(response.data);
-          if (arr.length)
+          this.$message.success(response.data.msg);
+          if (param.length)
             this.getExpress();
         }
       ).catch(error => {
-        this.$message.error(error);
+        console.log(error)
       })
     },
   }
@@ -259,7 +294,17 @@ export default {
   border-bottom: solid 1px #e6e6e6;
 }
 
-.header-title {
+.header-left {
+  display: inline-block;
+  float: left;
+  margin-left: 10px;
+  line-height: 60px;
+}
+
+.header-right {
+  display: inline-block;
+  float: right;
+  margin-right: 20px;
   line-height: 60px;
 }
 

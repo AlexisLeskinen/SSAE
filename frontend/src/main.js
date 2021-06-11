@@ -7,8 +7,10 @@ import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css';
 // 用于和后台交互，发送请求
 import axios from 'axios';
+
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 Vue.prototype.$axios = axios;
+axios.defaults.withCredentials = true
 Vue.prototype.api = "http://127.0.0.1:8000/api/";
 
 Vue.use(Element)
@@ -19,6 +21,6 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
-  components: { App },
+  components: {App},
   template: '<App/>'
 })

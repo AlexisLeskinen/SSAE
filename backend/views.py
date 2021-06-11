@@ -14,33 +14,34 @@ def test(request):
     return resultReturn(E.toJson())
 
 
-def resultReturn(data=[], msg="操作成功!"):
+def resultReturn(data=[], msg: str = "操作成功!", code: int = 200):
     """
-    @description: 
+    @description:
     封装了一下返回结果
     ---------
     @param: data是一个json，msg是提示信息
     -------
-    @Returns: 
+    @Returns:
     -------
     """
 
     res = {
         'msg': msg,
+        'code': code,
         'data': data
     }
 
-    return JsonResponse(res)
+    return JsonResponse(res, json_dumps_params={'ensure_ascii': False})
 
 
 def expressUpdate(request):
     """
-    @description: 
+    @description:
     更新快递通知状态、分发状态等
     ---------
     @param: 更新字段的json数组
     -------
-    @Returns: 
+    @Returns:
     -------
     """
 
@@ -51,42 +52,89 @@ def expressUpdate(request):
             res = "没有要更新的快递！"
         else:
             for d in param:
-                E = Express.objects.get(pk=d['id'])
+                E = Express.objects.get(pk=d['express_id'])
                 E.change(**d)
                 E.save()
-            res = param[0]['id']+"等"+str(len(param))+"个快递更新知成功！"
+            res = param[0]['express_id']+"等"+str(len(param))+"个快递更新成功！"
 
     return resultReturn(msg=res)
 
 
 def loginVerify(request):
     """
-    @description: 
-    登陆验证，验证员工id是否存在标注
+    @description:
+    登陆验证，验证员工id是否存在，并保存cookie
     ---------
     @param: 帐号和密码的json
     -------
-    @Returns: 员工类型和所属仓库
+    @Returns: 
     -------
     """
-
+    cookie = None
+    msg = ""
+    code = 200
     param = json.loads(request.body)
-    res = {}
     quryset = WareHouseWorker.objects.filter(
         employee_id=param['account'], password=param['password'])
     if(len(quryset)):
-        account = quryset[0]
-        res = {
-            'type': account.level,
-            'building': account.building
-        }
+        cookie = param['account']
+        msg = param['account']+"登陆成功！"
+    else:
+        msg = "帐号或密码错误！"
+        code = 400
+    res = resultReturn(msg=msg, code=code)
+    res.set_cookie("user", cookie)
+    return res
 
-    return resultReturn(data=res)
+
+def getAdminType(request):
+    """
+    @description: 
+    根据cookie获取登陆的管理员类型
+    ---------
+    @param: 无
+    -------
+    @Returns: 
+    -------
+    """
+
+    admin = request.COOKIES.get("user")
+    W = WareHouseWorker.objects.get(pk=admin)
+    code = 200
+    res = {}
+    if(int(W.level) < 2):
+        res = {
+            "type": W.level,
+            "building": W.building,
+            "user": W.employee_id + W.name
+        }
+    else:
+        code = 400
+
+    return resultReturn(data=res, code=code)
+
+
+def logOut(request):
+    """
+    @description: 
+    账号登出，删除对应的cookie
+    ---------
+    @param: 带有cookie的request
+    -------
+    @Returns: 
+    -------
+    """
+
+    user = request.COOKIES.get("user")
+    res = resultReturn(msg=user+"登出成功！")
+    res.delete_cookie("user")
+
+    return res
 
 
 def getWareHouse(request):
     """
-    @description: 
+    @description:
     获取所有仓库信息
     ---------
     @param: 无
@@ -94,13 +142,17 @@ def getWareHouse(request):
     @Returns: (C1,C1)类型的数组
     -------
     """
+    l = []
+    for b in buildings:
+        l.append(b[0])
+    l.pop(0)
 
-    return resultReturn(buildings)
+    return resultReturn(l)
 
 
 def getExpress(request):
     """
-    @description: 
+    @description:
     获取快递信息
     ---------
     @param: 包含要查询字段的json
@@ -119,12 +171,12 @@ def getExpress(request):
 
 def newReciver(request):
     """
-    @description: 
+    @description:
     随机生成收件人
     ---------
     @param: get请求中的num参数
     -------
-    @Returns: 
+    @Returns:
     -------
     """
     param = request.GET
@@ -133,7 +185,7 @@ def newReciver(request):
     Rs = G.receiver(num)
     before = Receiver.objects.count()
     for r in Rs:
-        if(Receiver.objects.filter(r['receive_id']).count == 0):
+        if(Receiver.objects.filter(receive_id=r['receive_id']).count() == 0):
             t = Receiver(**r)
             t.save()
     after = Receiver.objects.count()
@@ -142,12 +194,12 @@ def newReciver(request):
 
 def newWorker(request):
     """
-    @description: 
+    @description:
     随机生成工作人员
     ---------
     @param: get请求中的num参数
     -------
-    @Returns: 
+    @Returns:
     -------
     """
 
@@ -156,7 +208,7 @@ def newWorker(request):
     Ws = G.woker(num)
     before = WareHouseWorker.objects.count()
     for w in Ws:
-        if(WareHouseWorker.objects.filter(w['employee_id']).count == 0):
+        if(WareHouseWorker.objects.filter(employee_id=w['employee_id']).count() == 0):
             t = WareHouseWorker(**w)
             t.save()
     after = WareHouseWorker.objects.count()
@@ -165,12 +217,12 @@ def newWorker(request):
 
 def newExpress(request):
     """
-    @description: 
+    @description:
     随机生快递，注意，要先生成收件人
     ---------
     @param: get请求中的num参数
     -------
-    @Returns: 
+    @Returns:
     -------
     """
 
@@ -183,7 +235,7 @@ def newExpress(request):
     before = Express.objects.count()
     for e in Es:
         e.update({'receiver': Receiver.objects.order_by("?").first()})
-        if(Express.objects.filter(e['express_id']).count == 0):
+        if(Express.objects.filter(express_id=e['express_id']).count() == 0):
             t = Express(**e)
             t.save()
     after = Express.objects.count()

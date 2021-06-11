@@ -6,7 +6,9 @@ from django.urls import path
 # 这里添加api后面的url操作
 urlpatterns = [
     path('test', test),
-    path('login', loginVerify),
+    path('log-in', loginVerify),
+    path('admin-type', getAdminType),
+    path('log-out', logOut),
     path('get-express', getExpress),
     path('get-warehouse', getWareHouse),
     path('express-update', expressUpdate),

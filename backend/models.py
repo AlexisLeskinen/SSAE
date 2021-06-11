@@ -3,7 +3,7 @@ from django.db import models
 # 楼宇信息
 buildings = [("C"+str(_), "C"+str(_)) for _ in range(13)]
 # 员工类别
-workerType = [("0", "总仓分仓管理员"), ("1", "分仓管理员"), ("2", "分仓工作人员")]
+workerType = [("0", "总仓管理员"), ("1", "分仓管理员"), ("2", "分仓工作人员")]
 
 # 公共的用户信息
 
@@ -21,7 +21,7 @@ class BaseInfo(models.Model):
     class Meta:
         abstract = True
 
-    def toJson(self):
+    def toJson(self) -> dict:
         return {
             "name": self.name,
             "sex": self.sex,
@@ -49,7 +49,7 @@ class Receiver(BaseInfo):
         verbose_name = u"收件人"
         verbose_name_plural = u"收件人"
 
-    def toJson(self):
+    def toJson(self) -> dict:
         return super().toJson().update({
             "receive_id": self.receive_id,
             "self_service": self.self_service,
@@ -75,7 +75,7 @@ class WareHouseWorker(BaseInfo):
         verbose_name = u"工作人员"
         verbose_name_plural = u"工作人员"
 
-    def toJson(self):
+    def toJson(self) -> dict:
         return super().toJson().update({
             "employee_id": self.employee_id,
             "level": self.level
@@ -91,7 +91,7 @@ class Express(models.Model):
     is_notified = models.BooleanField(verbose_name="是否已通知楼宇管理员", default=False)
     is_divided = models.BooleanField(verbose_name="已分发到对应楼宇", default=False)
     # 收件人
-    receiver = models.OneToOneField(
+    receiver = models.ForeignKey(
         Receiver, on_delete=models.DO_NOTHING)
     # 位置号 （A5-2-2210）
     locate = models.CharField(
@@ -108,7 +108,7 @@ class Express(models.Model):
     def __str__(self):
         return self.express_id + "-" + self.receiver.name
 
-    def change(self, **kwgs):
+    def change(self, **kwgs) -> bool:
         """
         @description: 
         动态修改快递信息，配合save更新数据
@@ -134,17 +134,41 @@ class Express(models.Model):
                 c = True
         return c
 
-    def toJson(self):
+    def state(self) -> str:
+        """
+        @description: 
+        动态生成当前快递状态
+        -------
+        @Returns: str 快递状态
+        -------
+        """
+
+        state = "快递"
+        if(self.receive_date):
+            state += "已于"+str(self.receive_date)+"签收"
+        elif(self.locate):
+            state += "在" + self.receiver.building + "-" + self.locate
+        elif(self.is_divided):
+            state += "已分发至"+self.receiver.building+"仓库"
+        elif(self.is_notified):
+            state += "已通知分发"
+        else:
+            state += "未通知分发"
+
+        return state
+
+    def toJson(self) -> dict:
         return {
             "express_id": self.express_id,
             "is_notified": self.is_notified,
             "is_divided": self.is_divided,
-            "receiver": {
-                "name": self.receiver.name,
-                "self_service": self.receiver.self_service,
-                "building": self.receiver.building,
-                "door": self.receiver.door
-            },
+            "name": self.receiver.name,
+            "phone": self.receiver.phone,
+            "self_service": self.receiver.self_service,
+            "s_s_t": '是' if(self.receiver.self_service)else'否',
+            "building": self.receiver.building,
+            "door": self.receiver.door,
+            "state": self.state(),
             "locate": self.locate,
             "receive_date": self.receive_date,
         }

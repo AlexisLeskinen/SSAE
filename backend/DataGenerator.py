@@ -1,4 +1,5 @@
 import random
+from typing import List
 from faker import Faker
 from backend.models import buildings
 
@@ -6,8 +7,9 @@ from backend.models import buildings
 class DataGenerator(object):
     cfacker = Faker('zh_CN')
     sexoption = "男女"
+    maxNum = 500
 
-    def baseinfo(self, number):
+    def baseinfo(self, number: int) -> List:
         """
         @description: 
         随机生成基础人物信息
@@ -17,7 +19,7 @@ class DataGenerator(object):
         @Returns: json数组
         -------
         """
-
+        number = number % self.maxNum
         res = []
         for _ in range(number):
             b = {
@@ -30,7 +32,7 @@ class DataGenerator(object):
             res.append(b)
         return res
 
-    def receiver(self, number):
+    def receiver(self, number: int) -> List:
         """
         @description: 
         随机生成收件人信息
@@ -40,7 +42,7 @@ class DataGenerator(object):
         @Returns: json数组
         -------
         """
-
+        number = number % self.maxNum
         res = self.baseinfo(number)
         for r in res:
             t = {
@@ -52,7 +54,7 @@ class DataGenerator(object):
 
         return res
 
-    def woker(self, number):
+    def woker(self, number: int) -> List:
         """
         @description: 
         随机生成工作人员信息
@@ -62,7 +64,7 @@ class DataGenerator(object):
         @Returns: json数组
         -------
         """
-
+        number = number % self.maxNum
         res = self.baseinfo(number)
 
         for r in res:
@@ -74,7 +76,7 @@ class DataGenerator(object):
 
         return res
 
-    def express(self, number):
+    def express(self, number: int) -> List:
         """
         @description: 
         随机生成快递信息，注意要现有收件人信息
@@ -84,7 +86,7 @@ class DataGenerator(object):
         @Returns: json数组
         -------
         """
-
+        number = number % self.maxNum
         res = []
 
         for _ in range(number):
