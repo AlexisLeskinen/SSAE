@@ -6,6 +6,9 @@
                   :option-name="item.optionName"
                   :url="item.url"/>
     </el-row>
+    <el-row style="margin-top: 50px">
+      <el-button @click="Backend">进入系统后台</el-button>
+    </el-row>
   </div>
 </template>
 
@@ -21,7 +24,7 @@ export default {
         {
           icon: "el-icon-user",
           optionName: "用户信息管理",
-          url: "/admin"
+          url: "/user"
         },
         {
           icon: "el-icon-box",
@@ -35,12 +38,17 @@ export default {
         }],
     };
   },
+  methods: {
+    Backend() {
+      this.$router.push("/admin");
+    }
+  }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.home{
+.home {
   margin-top: 100px;
 }
 </style>

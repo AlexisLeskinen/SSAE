@@ -6,7 +6,7 @@
           <span>{{ tableName }}</span>
           <el-link :underline="false">当前仓库快递数量：{{ expressList.length }}</el-link>
         </div>
-<!--        <el-avatar >{{ user[0] }}</el-avatar>-->
+        <!--        <el-avatar >{{ user[0] }}</el-avatar>-->
         <div class="header-right">
           <el-link :underline="false">{{ user }}</el-link>
           <el-link :underline="false" @click="logout">注销</el-link>
@@ -100,7 +100,6 @@ export default {
       buildings: [],
       selected: [],
       loading: true,
-      shelves: {},
     }
   },
   created() {
@@ -129,7 +128,6 @@ export default {
                     is_notified: true,
                     receiver__building: result.data.building
                   };
-                  this.initShelves();
                   break;
               }
               this.user = result.data.user;
@@ -162,7 +160,6 @@ export default {
     getExpress() {
       this.$axios.post(this.api + "get-express", this.getExpressParam)
         .then(response => {
-            // console.log(response.data)
             this.expressList = response.data.data;
             this.initFilterList();
             this.loading = false;
@@ -247,53 +244,13 @@ export default {
         console.log(error)
       })
     },
-    initShelves() {
-      if (this.type !== 0) {
-        this.shelves = new Set()
-        this.expressList.forEach(i => {
-          if (i.locate)
-            this.shelves.add(i.locate)
-        })
-      }
-    },
-    /**随机生成货架号
-     * 范围为A0-0-0000到B9-9-9999
-     * @returns {string}
-     */
-    generalShelves() {
-      let res = null
-      let alp = ['A', 'B', 'C', 'D']
-      let num = Math.random()
-      num = Math.floor(num * 4)
-      res = alp[num]
-      num = Math.random()
-      num = ('000000' + Math.floor(num * 100000)).slice(-6);
-      res += num[0] + '-' + num[1] + '-' + num.slice(2)
-      //不能有重复的货架号
-      if (res in this.shelves)
-        res = this.generalShelves()
-      else
-        this.shelves.add(res)
-      return res
-    }
-    ,
     /**上架快递
      * 注意非自主取件不能上架
      */
     handleHandOn() {
-      let param = [];
-      this.selected.forEach(i => {
-        if (i.is_divided && !i["self_service"]) {
-          if (!i.locate)
-            i.locate = this.generalShelves();
-          param.push({
-            express_id: i.express_id,
-            locate: i.locate,
-          })
-        }
-      });
+      let param = this.getSelectedId(null);
       //发起请求
-      this.$axios.post(this.api + "express-update", param).then(
+      this.$axios.post(this.api + "express-handon", param).then(
         response => {
           this.$message.success(response.data.msg);
           if (param.length)

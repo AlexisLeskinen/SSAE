@@ -13,6 +13,7 @@ urlpatterns = [
     path('get-warehouse', getWareHouse),
     path('express-update', expressUpdate),
     path('express-received', receivedExpresss),
+    path('express-handon', handonExpresss),
     path('new-reciver', newReciver),
     path('new-worker', newWorker),
     path('new-express', newExpress),

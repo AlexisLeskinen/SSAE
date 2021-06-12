@@ -4,6 +4,7 @@ import Home from '../components/pages/Home'
 import Login from "../components/pages/Login";
 import ExpressDistribute from "../components/pages/ExpressDistribute";
 import ExpressDelivery from "../components/pages/ExpressDelivery";
+import Register from "../components/pages/Register";
 
 Vue.use(Router)
 
@@ -29,6 +30,11 @@ export default new Router({
       path: '/delivery',
       name: 'Delivery',
       component: ExpressDelivery
+    },
+    {
+      path: '/user',
+      name: 'User',
+      component: Register
     },
   ]
 })

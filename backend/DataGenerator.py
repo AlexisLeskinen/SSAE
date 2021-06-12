@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Set
 from faker import Faker
 from backend.models import buildings
 
@@ -8,6 +8,7 @@ class DataGenerator(object):
     cfacker = Faker('zh_CN')
     sexoption = "男女"
     maxNum = 500
+    shelves = set()
 
     def baseinfo(self, number: int) -> List:
         """
@@ -101,6 +102,20 @@ class DataGenerator(object):
             }
 
             res.append(e)
+
+        return res
+
+    def shelf(self) -> str:
+        res = ""
+        alp = ['A', 'B', 'C', 'D']
+        res += alp[random.randint(0, 3)]
+        num = str(random.randint(0, 999999)).zfill(6)
+        res += num[0] + '-' + num[1] + '-' + num[2::]
+
+        if res in self.shelves:
+            res = self.shelf()
+        else:
+            self.shelves.add(res)
 
         return res
 
