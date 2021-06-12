@@ -4,6 +4,7 @@
       <div>
         <div class="header-left">
           <span>{{ tableName }}</span>
+          <el-link :underline="false">当前仓库快递数量：{{ expressList.length }}</el-link>
         </div>
         <div class="header-right">
           <i class="el-icon-user" style="font-size: 30px;"></i>
@@ -63,11 +64,15 @@
           </el-table-column>
         </div>
       </el-table>
-      <el-button v-if="type===0" type="primary" class="footer-button"
+      <el-button v-if="type===0" type="plain" class="footer-button-left"
+                 round @click="getNewExpress">
+        从校外接受快递
+      </el-button>
+      <el-button v-if="type===0" type="primary" class="footer-button-right"
                  round @click="updateExpress({'is_notified':true})">
         通知分发快递
       </el-button>
-      <div v-else class="footer-button">
+      <div v-else class="footer-button-right">
         <el-button type="plain"
                    round @click="updateExpress({'is_divided':true})">
           领取快递
@@ -103,7 +108,6 @@ export default {
   },
   methods: {
     initTableApi() {
-
       this.$axios.get(this.api + 'admin-type').then(
         response => {
           let result = response.data
@@ -125,7 +129,7 @@ export default {
                     is_notified: true,
                     receiver__building: result.data.building
                   };
-                  this.shelves = new Set();
+                  this.initShelves();
                   break;
               }
               this.user = result.data.user;
@@ -143,12 +147,14 @@ export default {
     },
     //登出
     logout() {
-      this.$axios.get(this.api + 'log-out').then(
+      let _v = this;
+      _v.$axios.get(this.api + 'log-out').then(
         r => {
-          this.$message.success(r.data.msg)
+          if (r.data.msg)
+            _v.$message.success(r.data.msg)
         }
       )
-      this.$router.push({
+      _v.$router.push({
         path: "/login"
       });
     },
@@ -165,8 +171,9 @@ export default {
         .catch(error => {
           console.log(error);
         })
-    },
-    // 初始化筛选列表的楼号
+    }
+    ,
+// 初始化筛选列表的楼号
     initFilterList() {
       this.$axios.get(this.api + "get-warehouse")
         .then(response => {
@@ -183,7 +190,8 @@ export default {
         .catch(error => {
           console.log(error)
         });
-    },
+    }
+    ,
     /**
      *
      * @param value 筛选的值
@@ -194,13 +202,16 @@ export default {
     filterHandler(value, row, column) {
       const property = column['property'];
       return row[property] === value;
-    },
+    }
+    ,
     handleSelectAll(value) {
       this.selected = value
-    },
+    }
+    ,
     handleSelect(value) {
       this.selected = value
-    },
+    }
+    ,
     /**
      * 生成更新数组
      * @param mode  要跟新的字段，字典
@@ -216,7 +227,8 @@ export default {
         arr.push(t)
       });
       return arr
-    },
+    }
+    ,
     /**
      * 更新快递状态
      * @param mode  更新的字段
@@ -234,6 +246,15 @@ export default {
       ).catch(error => {
         console.log(error)
       })
+    },
+    initShelves() {
+      if (this.type !== 0) {
+        this.shelves = new Set()
+        this.expressList.forEach(i => {
+          if (i.locate)
+            this.shelves.add(i.locate)
+        })
+      }
     },
     /**随机生成货架号
      * 范围为A0-0-0000到B9-9-9999
@@ -254,7 +275,8 @@ export default {
       else
         this.shelves.add(res)
       return res
-    },
+    }
+    ,
     /**上架快递
      * 注意非自主取件不能上架
      */
@@ -281,6 +303,16 @@ export default {
         console.log(error)
       })
     },
+    getNewExpress() {
+      let num = Math.floor(Math.random() * 50)
+      let _v = this;
+      this.$axios.post(this.api + "new-express?num=" + num).then(r => {
+        _v.$message.success(r.data.msg)
+        this.getExpress();
+      }).catch(e => {
+        console.log(e)
+      })
+    }
   }
 }
 </script>
@@ -308,7 +340,13 @@ export default {
   line-height: 60px;
 }
 
-.footer-button {
+.footer-button-left {
+  float: left;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.footer-button-right {
   float: right;
   margin-top: 10px;
   margin-right: 10px;

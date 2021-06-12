@@ -3,14 +3,13 @@
     <el-form :model="form" :rules="rules" label-width="80px" class="login-box">
       <h3 class="login-title">管理员登陆</h3>
       <el-form-item label="员工ID" prop="account">
-        <el-input type="text" placeholder="请输入账号" v-model="form.account"/>
+        <el-input type="text" clearable maxlength="5" placeholder="请输入账号" v-model="form.account"/>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input type="password" placeholder="请输入密码" v-model="form.password"/>
+        <el-input type="password" clearable maxlength="8" placeholder="请输入密码" v-model="form.password"/>
       </el-form-item>
-      <el-form-item>
-        <el-button type="primary" v-on:click="onSubmit()">登录</el-button>
-      </el-form-item>
+      <el-button type="plain" v-on:click="onBack">返回</el-button>
+      <el-button type="primary" v-on:click="onSubmit">登录</el-button>
     </el-form>
 
     <el-dialog
@@ -55,9 +54,12 @@ export default {
         switch (response.data.code) {
           case 200:
             this.$message.success(response.data.msg)
-            this.$router.push({
-              path: "/express-handle"
-            });
+            let _v = this;
+            setTimeout(function () {
+              _v.$router.push({
+                path: "/express-handle"
+              });
+            }, 500)
             break;
           default:
             this.$message.error(response.data.msg)
@@ -65,6 +67,9 @@ export default {
       }).catch(error => {
         console.log(error);
       });
+    },
+    onBack() {
+      this.$router.push('/');
     }
   }
 }
@@ -75,7 +80,7 @@ export default {
   border: 1px solid #DCDFE6;
   width: 350px;
   margin: 100px auto;
-  padding: 35px 35px 15px 35px;
+  padding: 35px 15px;
   border-radius: 5px;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;

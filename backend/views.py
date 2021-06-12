@@ -1,5 +1,6 @@
+from datetime import datetime
 from backend.models import Express, Receiver, WareHouseWorker, buildings
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import JsonResponse
 from backend.DataGenerator import G
 import json
 
@@ -32,6 +33,36 @@ def resultReturn(data=[], msg: str = "操作成功!", code: int = 200):
     }
 
     return JsonResponse(res, json_dumps_params={'ensure_ascii': False})
+
+
+def receivedExpresss(request):
+    """
+    @description: 
+    后台记录签收时间，前端记录的话
+    请调用下面的expressUpdate方法
+    ---------
+    @param: 带有express_id的json
+    -------
+    @Returns: 
+    -------
+    """
+
+    res = None
+    code = 200
+    if(request.body):
+        param = json.loads(request.body)
+        if(len(param) == 0):
+            res = "没有要签收的快递！"
+            code = 400
+        else:
+            for d in param:
+                E = Express.objects.get(pk=d['express_id'])
+                if(not E.receive_date):
+                    E.receive_date = datetime.now()
+                    E.save()
+                res = param[0]['express_id']+"等"+str(len(param))+"个快递签收成功！"
+
+    return resultReturn(msg=res, code=code)
 
 
 def expressUpdate(request):
@@ -124,10 +155,11 @@ def logOut(request):
     @Returns: 
     -------
     """
-
-    user = request.COOKIES.get("user")
-    res = resultReturn(msg=user+"登出成功！")
-    res.delete_cookie("user")
+    res = resultReturn(msg="")
+    if("user" in request.COOKIES):
+        user = request.COOKIES.get("user")
+        res = resultReturn(msg=user+"登出成功！")
+        res.delete_cookie("user")
 
     return res
 
@@ -239,4 +271,4 @@ def newExpress(request):
             t = Express(**e)
             t.save()
     after = Express.objects.count()
-    return resultReturn(msg="成功生成"+str(after-before)+"个快递！")
+    return resultReturn(msg="成功接受"+str(after-before)+"个快递！")
