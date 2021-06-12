@@ -1,13 +1,13 @@
 <template>
-  <el-container class="main-table">
+  <el-container class="whole">
     <el-header>
       <div>
         <div class="header-left">
           <span>{{ tableName }}</span>
           <el-link :underline="false">当前仓库快递数量：{{ expressList.length }}</el-link>
         </div>
+<!--        <el-avatar >{{ user[0] }}</el-avatar>-->
         <div class="header-right">
-          <i class="el-icon-user" style="font-size: 30px;"></i>
           <el-link :underline="false">{{ user }}</el-link>
           <el-link :underline="false" @click="logout">注销</el-link>
         </div>
@@ -89,7 +89,7 @@
 <script>
 
 export default {
-  name: "ExpressHandle",
+  name: "ExpressDistribute",
   data() {
     return {
       type: 0,
@@ -109,8 +109,8 @@ export default {
   methods: {
     initTableApi() {
       this.$axios.get(this.api + 'admin-type').then(
-        response => {
-          let result = response.data
+        r => {
+          let result = r.data
           switch (result.code) {
             case 200:
               this.type = Number(result.data.type)
@@ -140,9 +140,9 @@ export default {
           }
           this.getExpress();
         }
-      ).catch(error => {
+      ).catch(e => {
         this.logout();
-        console.log(error);
+        console.log(e);
       })
     },
     //登出
@@ -173,7 +173,7 @@ export default {
         })
     }
     ,
-// 初始化筛选列表的楼号
+    // 初始化筛选列表的楼号
     initFilterList() {
       this.$axios.get(this.api + "get-warehouse")
         .then(response => {
@@ -318,7 +318,7 @@ export default {
 </script>
 
 <style scoped>
-.main-table {
+.whole {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 

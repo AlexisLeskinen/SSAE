@@ -110,6 +110,7 @@ def loginVerify(request):
     if(len(quryset)):
         cookie = param['account']
         msg = param['account']+"登陆成功！"
+        code += int(quryset[0].level)
     else:
         msg = "帐号或密码错误！"
         code = 400
@@ -128,16 +129,15 @@ def getAdminType(request):
     @Returns: 
     -------
     """
-
-    admin = request.COOKIES.get("user")
-    W = WareHouseWorker.objects.get(pk=admin)
     code = 200
     res = {}
-    if(int(W.level) < 2):
+    if ("user" in request.COOKIES):
+        admin = request.COOKIES.get("user")
+        W = WareHouseWorker.objects.get(pk=admin)
         res = {
             "type": W.level,
             "building": W.building,
-            "user": W.employee_id + W.name
+            "user":  W.name +" "+ W.employee_id
         }
     else:
         code = 400

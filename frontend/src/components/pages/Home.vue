@@ -20,18 +20,18 @@ export default {
       enrtyList: [
         {
           icon: "el-icon-user",
-          optionName: "用户管理",
+          optionName: "用户信息管理",
           url: "/admin"
         },
         {
           icon: "el-icon-box",
-          optionName: "收件模块",
+          optionName: "校内快递流转",
           url: "/login"
         },
         {
           icon: "el-icon-receiving",
-          optionName: "配送模块",
-          url: ""
+          optionName: "自提与配送",
+          url: "/login"
         }],
     };
   },

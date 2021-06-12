@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '../components/pages/Home'
 import Login from "../components/pages/Login";
-import ExpressHandle from "../components/pages/ExpressHandle";
+import ExpressDistribute from "../components/pages/ExpressDistribute";
+import ExpressDelivery from "../components/pages/ExpressDelivery";
 
 Vue.use(Router)
 
@@ -20,9 +21,14 @@ export default new Router({
       component: Login
     },
     {
-      path: '/express-handle',
-      name: 'express-handle',
-      component: ExpressHandle
+      path: '/distribute',
+      name: 'Distribute',
+      component: ExpressDistribute
+    },
+    {
+      path: '/delivery',
+      name: 'Delivery',
+      component: ExpressDelivery
     },
   ]
 })

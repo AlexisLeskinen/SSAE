@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-form :model="form" :rules="rules" label-width="80px" class="login-box">
-      <h3 class="login-title">管理员登陆</h3>
+      <h3 class="login-title">工作人员登陆</h3>
       <el-form-item label="员工ID" prop="account">
         <el-input type="text" clearable maxlength="5" placeholder="请输入账号" v-model="form.account"/>
       </el-form-item>
@@ -30,7 +30,7 @@ export default {
   data() {
     return {
       form: {
-        account: '36008',
+        account: '26970',
         password: '0000'
       },
 
@@ -50,19 +50,29 @@ export default {
   },
   methods: {
     onSubmit() {
+      let _v = this;
       this.$axios.post(this.api + 'log-in', this.form).then(response => {
+
         switch (response.data.code) {
           case 200:
-            this.$message.success(response.data.msg)
-            let _v = this;
+          case 201:
+            _v.$message.success(response.data.msg)
             setTimeout(function () {
               _v.$router.push({
-                path: "/express-handle"
+                path: "/distribute"
+              });
+            }, 500)
+            break;
+          case 202:
+            _v.$message.success(response.data.msg)
+            setTimeout(function () {
+              _v.$router.push({
+                path: "/delivery"
               });
             }, 500)
             break;
           default:
-            this.$message.error(response.data.msg)
+            _v.$message.error(response.data.msg)
         }
       }).catch(error => {
         console.log(error);

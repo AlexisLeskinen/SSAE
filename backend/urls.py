@@ -12,7 +12,7 @@ urlpatterns = [
     path('get-express', getExpress),
     path('get-warehouse', getWareHouse),
     path('express-update', expressUpdate),
-    path('express-recived', receivedExpresss),
+    path('express-received', receivedExpresss),
     path('new-reciver', newReciver),
     path('new-worker', newWorker),
     path('new-express', newExpress),
