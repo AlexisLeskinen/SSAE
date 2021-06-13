@@ -1,6 +1,6 @@
 <template>
   <div class="whole">
-    <el-card>
+    <el-card class="card" style="margin-top: 100px">
       <span slot="header"><i class="el-icon-user-solid"></i>工作人员登陆</span>
       <el-form :model="form" :rules="rules" label-width="80px" ref="form">
         <el-form-item label="员工ID" prop="account">
@@ -81,6 +81,6 @@ export default {
 .whole {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   width: fit-content;
-  margin: 100px auto 0 auto;
+  margin: 0 auto;
 }
 </style>

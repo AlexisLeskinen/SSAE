@@ -1,6 +1,6 @@
 <template>
   <div class="whole">
-    <el-card v-if="login">
+    <el-card v-if="login" style="margin-top: 100px">
       <div slot="header">
         <span>用户登陆</span>
         <el-link class="header-right" @click="userRegister" :underline="false">注册</el-link>
@@ -18,7 +18,7 @@
       </el-form>
     </el-card>
     <div v-else>
-      <el-card>
+      <el-card style="margin-top: 50px">
         <div slot="header">
           <span v-if="register">注册</span>
           <span v-else>用户信息修改</span>
@@ -184,7 +184,7 @@ export default {
 .whole {
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   width: fit-content;
-  margin: 100px auto 0 auto;
+  margin: 0 auto;
 }
 
 .header-right {
