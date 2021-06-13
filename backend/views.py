@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import random
 from backend.models import Express, Receiver, WareHouseWorker, buildings
 from django.http.response import JsonResponse
 from backend.DataGenerator import G
@@ -33,6 +34,86 @@ def resultReturn(data=[], msg: str = "操作成功!", code: int = 200):
     }
 
     return JsonResponse(res, json_dumps_params={'ensure_ascii': False})
+
+
+def saveReceiver(request):
+    """
+    @description:
+    注册一个收件人，随机生成id
+    或者保存一个收件人的修改
+    ---------
+    @param: 除id以外的完整json信息
+    -------
+    @Returns:
+    -------
+    """
+
+    param = json.loads(request.body)
+    R = None
+    msg = ""
+    if("receive_id" not in param):
+        receive_id = str(random.randrange(1, 100000)).zfill(5)
+        while len(Receiver.objects.filter(receive_id=receive_id)):
+            receive_id = str(random.randrange(1, 100000)).zfill(5)
+
+        param.update({"receive_id": receive_id})
+        R = Receiver(**param)
+        R.save()
+        msg = "注册成功！"
+    else:
+        Receiver.objects.filter(
+            receive_id=param["receive_id"]).update(**param)
+        R = Receiver.objects.get(pk=param["receive_id"])
+        msg = "修改成功！"
+
+    return resultReturn(msg=msg, data=R.toJson())
+
+
+def userLogin(request):
+    """
+    @description: 
+    用户登陆，用手机号作为账号
+    ---------
+    @param: json 手机号+密码
+    -------
+    @Returns: 
+    -------
+    """
+
+    msg = ""
+    code = 200
+    data = []
+    param = json.loads(request.body)
+    quryset = Receiver.objects.filter(
+        phone=param['account'], password=param['password'])
+    if(len(quryset)):
+        msg = param['account']+"登陆成功！"
+        data = quryset[0].toJson()
+    else:
+        msg = "帐号或密码错误！"
+        code = 400
+
+    return resultReturn(msg=msg, code=code, data=data)
+
+
+def getReceiver(request):
+    """
+    @description: 
+    获取收件人信息
+    ---------
+    @param: 查询的json
+    -------
+    @Returns: 
+    -------
+    """
+
+    param = json.loads(request.body)
+    queryset = Receiver.objects.filter(**param)
+    data = []
+    for q in queryset:
+        data.append(q.toJson())
+
+    return resultReturn(data=data, msg='获取成功！')
 
 
 def handonExpresss(request):

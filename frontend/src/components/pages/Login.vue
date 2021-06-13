@@ -2,7 +2,7 @@
   <div class="whole">
     <el-card>
       <span slot="header"><i class="el-icon-user-solid"></i>工作人员登陆</span>
-      <el-form :model="form" :rules="rules" label-width="80px">
+      <el-form :model="form" :rules="rules" label-width="80px" ref="form">
         <el-form-item label="员工ID" prop="account">
           <el-input type="text" clearable maxlength="5" placeholder="请输入账号" v-model="form.account"/>
         </el-form-item>
@@ -40,31 +40,34 @@ export default {
   methods: {
     onSubmit() {
       let _v = this;
-      this.$axios.post(this.api + 'log-in', this.form).then(response => {
-
-        switch (response.data.code) {
-          case 200:
-          case 201:
-            _v.$message.success(response.data.msg)
-            setTimeout(function () {
-              _v.$router.push({
-                path: "/distribute"
-              });
-            }, 500)
-            break;
-          case 202:
-            _v.$message.success(response.data.msg)
-            setTimeout(function () {
-              _v.$router.push({
-                path: "/delivery"
-              });
-            }, 500)
-            break;
-          default:
-            _v.$message.error(response.data.msg)
+      _v.$refs['form'].validate(v => {
+        if (v) {
+          this.$axios.post(this.api + 'log-in', this.form).then(response => {
+            switch (response.data.code) {
+              case 200:
+              case 201:
+                _v.$message.success(response.data.msg)
+                setTimeout(function () {
+                  _v.$router.push({
+                    path: "/distribute"
+                  });
+                }, 500)
+                break;
+              case 202:
+                _v.$message.success(response.data.msg)
+                setTimeout(function () {
+                  _v.$router.push({
+                    path: "/delivery"
+                  });
+                }, 500)
+                break;
+              default:
+                _v.$message.error(response.data.msg)
+            }
+          }).catch(error => {
+            console.log(error);
+          });
         }
-      }).catch(error => {
-        console.log(error);
       });
     },
     onBack() {

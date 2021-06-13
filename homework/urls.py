@@ -19,7 +19,7 @@ from django.views.generic.base import TemplateView
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')),
-    path('login', TemplateView.as_view(template_name='index.html')),
+    re_path(r'login*', TemplateView.as_view(template_name='index.html')),
     path('user', TemplateView.as_view(template_name='index.html')),
     path('distribute', TemplateView.as_view(template_name='index.html')),
     path('delivery', TemplateView.as_view(template_name='index.html')),

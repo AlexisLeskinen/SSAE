@@ -35,7 +35,7 @@ class BaseInfo(models.Model):
 
 class Receiver(BaseInfo):
     receive_id = models.CharField(
-        max_length=5, verbose_name="收件人id", primary_key=True, editable=False)
+        max_length=5, verbose_name="收件人id", primary_key=True)
     self_service = models.BooleanField(verbose_name="自助取件")
     building = models.CharField(
         verbose_name="收件地址", max_length=5, choices=buildings, default="C0")
@@ -50,11 +50,13 @@ class Receiver(BaseInfo):
         verbose_name_plural = u"收件人"
 
     def toJson(self) -> dict:
-        return super().toJson().update({
+        res = super().toJson()
+        res.update({
             "receive_id": self.receive_id,
             "self_service": self.self_service,
             "door": self.door
         })
+        return res
 
 
 # 管理员、员工  单例类
@@ -62,7 +64,7 @@ class Receiver(BaseInfo):
 
 class WareHouseWorker(BaseInfo):
     employee_id = models.CharField(
-        max_length=5, verbose_name="员工id", primary_key=True, editable=False)
+        max_length=5, verbose_name="员工id", primary_key=True)
     level = models.CharField(
         max_length=2, verbose_name="职工类别", choices=workerType)
     building = models.CharField(
@@ -76,10 +78,12 @@ class WareHouseWorker(BaseInfo):
         verbose_name_plural = u"工作人员"
 
     def toJson(self) -> dict:
-        return super().toJson().update({
+        res = super().toJson()
+        res.update({
             "employee_id": self.employee_id,
             "level": self.level
         })
+        return res
 
 # 快递信息   单例类
 
@@ -87,7 +91,7 @@ class WareHouseWorker(BaseInfo):
 class Express(models.Model):
     # id
     express_id = models.CharField(
-        verbose_name="快递ID", max_length=7, primary_key=True, editable=False)
+        verbose_name="快递ID", max_length=7, primary_key=True)
     is_notified = models.BooleanField(verbose_name="是否已通知楼宇管理员", default=False)
     is_divided = models.BooleanField(verbose_name="已分发到对应楼宇", default=False)
     # 收件人

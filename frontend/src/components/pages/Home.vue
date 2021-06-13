@@ -1,13 +1,20 @@
 <template>
   <div class="home">
     <el-row type="flex" justify="space-around" align="middle">
-      <entry-card v-for="item in enrtyList"
-                  :icon="item.icon"
-                  :option-name="item.optionName"
-                  :url="item.url"/>
+      <entry-card
+        v-for="item in enrtyList"
+        :icon="item.icon"
+        :option-name="item.optionName"
+        :url="item.url"
+      />
     </el-row>
     <el-row style="margin-top: 50px">
-      <el-button @click="Backend">进入系统后台</el-button>
+      <el-button>
+        <el-link href="https://shotgun.zone/admin/"
+                 target="_blank" :underline="false">
+          进入系统后台
+        </el-link>
+      </el-button>
     </el-row>
   </div>
 </template>
@@ -24,25 +31,21 @@ export default {
         {
           icon: "el-icon-user",
           optionName: "用户信息管理",
-          url: "/user"
+          url: "/user",
         },
         {
           icon: "el-icon-box",
           optionName: "校内快递流转",
-          url: "/login"
+          url: "/login",
         },
         {
           icon: "el-icon-receiving",
           optionName: "自提与配送",
-          url: "/login"
-        }],
+          url: "/login",
+        },
+      ],
     };
   },
-  methods: {
-    Backend() {
-      this.$router.push("/admin");
-    }
-  }
 };
 </script>
 
