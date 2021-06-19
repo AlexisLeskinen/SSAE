@@ -220,6 +220,7 @@ def loginVerify(request):
     cookie = None
     msg = ""
     code = 200
+    data=[]
     param = json.loads(request.body)
     quryset = WareHouseWorker.objects.filter(
         employee_id=param['account'], password=param['password'])
@@ -227,10 +228,11 @@ def loginVerify(request):
         cookie = param['account']
         msg = param['account']+"登陆成功！"
         code += int(quryset[0].level)
+        data=quryset[0].toJson()
     else:
         msg = "帐号或密码错误！"
         code = 400
-    res = resultReturn(msg=msg, code=code)
+    res = resultReturn(msg=msg, code=code,data=data)
     res.set_cookie("user", cookie)
     return res
 
